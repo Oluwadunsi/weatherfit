@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'favorite_locations_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,8 +25,14 @@ class WeatherHomePage extends StatefulWidget {
 }
 
 class _WeatherHomePageState extends State<WeatherHomePage> {
-  List<String> favoriteLocations = [];
+  final ValueNotifier<List<String>> favoriteLocations = ValueNotifier([]);
   String currentLocation = "New York, USA";
+
+  @override
+  void dispose() {
+    favoriteLocations.dispose();
+    super.dispose();
+  }
 
   // Mock hourly data
   List<Map<String, String>> getHourlyData() {
@@ -69,10 +76,17 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FavoriteLocationsPage(favoriteLocations: favoriteLocations),
+                  builder: (context) => FavoriteLocationsPage(
+                    favoriteLocations: favoriteLocations,
+                    onRemove: (location) {
+                      favoriteLocations.value.remove(location);
+                      favoriteLocations.notifyListeners();
+                    },
+                  ),
                 ),
               );
             },
+
             child: const Text(
               "Favorites",
               style: TextStyle(color: Colors.white),
@@ -101,21 +115,24 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                     // Top Section
                     Row(
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            favoriteLocations.contains(currentLocation)
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: favoriteLocations.contains(currentLocation) ? Colors.red : null,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              if (favoriteLocations.contains(currentLocation)) {
-                                favoriteLocations.remove(currentLocation);
-                              } else {
-                                favoriteLocations.add(currentLocation);
-                              }
-                            });
+                        ValueListenableBuilder<List<String>>(
+                          valueListenable: favoriteLocations,
+                          builder: (context, favorites, child) {
+                            final isFavorited = favorites.contains(currentLocation);
+                            return IconButton(
+                              icon: Icon(
+                                isFavorited ? Icons.favorite : Icons.favorite_border,
+                                color: isFavorited ? Colors.red : null,
+                              ),
+                              onPressed: () {
+                                if (isFavorited) {
+                                  favorites.remove(currentLocation);
+                                } else {
+                                  favorites.add(currentLocation);
+                                }
+                                favoriteLocations.notifyListeners();
+                              },
+                            );
                           },
                         ),
                         Expanded(
@@ -371,33 +388,3 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   }
 }
 
-class FavoriteLocationsPage extends StatelessWidget {
-  final List<String> favoriteLocations;
-
-  const FavoriteLocationsPage({Key? key, required this.favoriteLocations}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Favorite Locations"),
-        backgroundColor: Colors.blue,
-      ),
-      body: favoriteLocations.isEmpty
-          ? Center(
-        child: Text(
-          "No favorite locations added yet.",
-          style: TextStyle(fontSize: 18),
-        ),
-      )
-          : ListView.builder(
-        itemCount: favoriteLocations.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(favoriteLocations[index]),
-          );
-        },
-      ),
-    );
-  }
-}
