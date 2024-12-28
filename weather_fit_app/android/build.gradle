@@ -1,19 +1,7 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://storage.googleapis.com/download.flutter.io' } // Flutter's Maven repository
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.1' // Ensure Gradle plugin version is compatible
-    }
-}
-
 allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://storage.googleapis.com/download.flutter.io' } // Flutter's Maven repository
     }
 }
 
@@ -30,3 +18,5 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'favorite_locations_page.dart';
+import 'package:weather_fit_app/models/weather_model.dart';
+import 'package:weather_fit_app/services/weather_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,14 +27,34 @@ class WeatherHomePage extends StatefulWidget {
 }
 
 class _WeatherHomePageState extends State<WeatherHomePage> {
-  final ValueNotifier<List<String>> favoriteLocations = ValueNotifier([]);
-  String currentLocation = "New York, USA";
+  final _weatherService = WeatherService('3df683afc2a8c5ffaad3c79a3cebe230');
+  WeatherModel? _weather;
 
+  _getWeather() async {
+    String postalCode = await _weatherService.getPostalCode();
+    String countryCode = await _weatherService.getCountryCode();
+
+    try {
+      final currentWeather = await _weatherService.getWeather(postalCode, countryCode);
+      setState(() {
+        _weather = currentWeather;
+      });
+    }
+    catch (e) {
+      print(e);
+    }
+  }
+
+  final ValueNotifier<List<String>> favoriteLocations = ValueNotifier([]);
+  //String currentLocation = _weather?.location ?? "loading location..";
+  String currentLocation = "New York";
   @override
   void dispose() {
     favoriteLocations.dispose();
     super.dispose();
+
   }
+
 
   // Mock hourly data
   List<Map<String, String>> getHourlyData() {
@@ -58,6 +80,13 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       default:
         return "assets/clear.jpg";
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getWeather();
   }
 
   @override
@@ -155,21 +184,27 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          currentLocation,
+                          _weather?.location ?? "loading location",
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: 10),
-                        Text(
-                          "27°C",
+                        Text('${_weather?.temperature.round()}°' ?? '',
                           style: TextStyle(
                             fontSize: 64,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
+                        Text('${_weather?.weatherCondition}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black87,
+                          ),
+                        ),
                         SizedBox(height: 10),
                         Text(
-                          "UV Index: Moderate",
+                          'UV Index: Low',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w400,
@@ -346,7 +381,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                                 ),
                               ),
                               Text(
-                                "65%",
+                                '${_weather?.humidity}%', //humidity set
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.white,
@@ -387,4 +422,3 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     );
   }
 }
-
