@@ -27,15 +27,18 @@ class WeatherHomePage extends StatefulWidget {
 }
 
 class _WeatherHomePageState extends State<WeatherHomePage> {
+  // apikey is sent into weather service as a parameter
   final _weatherService = WeatherService('3df683afc2a8c5ffaad3c79a3cebe230');
   WeatherModel? _weather;
+  final TextEditingController searchLocation = TextEditingController();
+  String cityInput = "";
 
   _getWeather() async {
     String postalCode = await _weatherService.getPostalCode();
     String countryCode = await _weatherService.getCountryCode();
 
     try {
-      final currentWeather = await _weatherService.getWeather(postalCode, countryCode);
+      final currentWeather = await _weatherService.getWeather(postalCode, countryCode, searchLocation.text);
       setState(() {
         _weather = currentWeather;
       });
@@ -43,6 +46,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     catch (e) {
       print(e);
     }
+
   }
 
   final ValueNotifier<List<String>> favoriteLocations = ValueNotifier([]);
@@ -50,7 +54,9 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   String currentLocation = "New York";
   @override
   void dispose() {
+    // clean up when widget is disposed/stopped being used
     favoriteLocations.dispose();
+    searchLocation.dispose();
     super.dispose();
 
   }
@@ -166,14 +172,23 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                         ),
                         Expanded(
                           child: TextField(
+                            controller: searchLocation,
                             decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.search),
-                              hintText: "Search location",
+                              prefixIcon: IconButton(
+                                onPressed:(){_getWeather();} ,
+                                icon: Icon(Icons.search),
+                              ),
+                              hintText: "search city",
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
+                            onSubmitted: (value) {
+                              cityInput = value;
+                              searchLocation.clear();
+                            },
                           ),
+
                         ),
                       ],
                     ),
@@ -184,7 +199,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          _weather?.location ?? "loading location",
+                          _weather?.location ?? 'loading location',
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: 10),
