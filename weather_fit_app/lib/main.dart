@@ -38,7 +38,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     String countryCode = await _weatherService.getCountryCode();
 
     try {
-      final currentWeather = await _weatherService.getWeather(postalCode, countryCode, searchLocation.text);
+      final currentWeather = await _weatherService.getWeather(postalCode, countryCode, cityInput);
       setState(() {
         _weather = currentWeather;
       });
@@ -175,7 +175,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                             controller: searchLocation,
                             decoration: InputDecoration(
                               prefixIcon: IconButton(
-                                onPressed:(){_getWeather();} ,
+                               onPressed:(){} ,
                                 icon: Icon(Icons.search),
                               ),
                               hintText: "search city",
@@ -184,7 +184,12 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                               ),
                             ),
                             onSubmitted: (value) {
-                              cityInput = value;
+                              setState(() {
+                                cityInput = searchLocation.text;
+                              });
+                              //cityInput = value;
+                              _getWeather();
+
                               searchLocation.clear();
                             },
                           ),
@@ -203,13 +208,6 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: 10),
-                        Text('${_weather?.temperature.round()}°' ?? '',
-                          style: TextStyle(
-                            fontSize: 64,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
                         Text('${_weather?.weatherCondition}',
                           style: TextStyle(
                             fontSize: 18,
@@ -217,6 +215,14 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                             color: Colors.black87,
                           ),
                         ),
+                        Text('${_weather?.temperature.round()}°' ?? '',
+                          style: TextStyle(
+                            fontSize: 64,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+
                         SizedBox(height: 10),
                         Text(
                           'UV Index: Low',
