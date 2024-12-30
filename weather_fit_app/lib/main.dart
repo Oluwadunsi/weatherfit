@@ -175,7 +175,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                             controller: searchLocation,
                             decoration: InputDecoration(
                               prefixIcon: IconButton(
-                               onPressed:(){} ,
+                               onPressed:(){_getWeather();} ,
                                 icon: Icon(Icons.search),
                               ),
                               hintText: "search city",
