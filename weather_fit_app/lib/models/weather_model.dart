@@ -20,3 +20,17 @@ class WeatherModel {
     );
   }
 }
+
+/* class WeatherForecast{
+  final String sevenDayForecast;
+
+  WeatherForecast({
+    required this.sevenDayForecast
+  });
+
+  factory WeatherForecast.fromJson(Map<String, dynamic> json) {
+    return WeatherForecast(
+        sevenDayForecast: json['list'][0]['temp']['day'].toDouble()
+    );
+  }
+} */

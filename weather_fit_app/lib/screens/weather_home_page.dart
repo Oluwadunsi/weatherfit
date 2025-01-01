@@ -25,7 +25,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   WeatherModel? _weather;
   String _cityInput = "";
   String _currentLocation = "New York";
-
+  //WeatherForecast? _forecast;
   @override
   void initState() {
     super.initState();
@@ -37,7 +37,13 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     String countryCode = await _weatherService.getCountryCode();
     try {
       final currentWeather = await _weatherService.getWeather(postalCode, countryCode, _cityInput);
-      setState(() => _weather = currentWeather);
+      //final dailyForecast = await _weatherService.dailyForecast("56.16", "15.58");
+      setState(() {
+        _weather = currentWeather;
+        //_forecast = dailyForecast;
+      });
+
+
     } catch (e) {
       print(e);
     }
@@ -150,7 +156,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                     const SizedBox(height: 20),
 
                     // Upcoming Days
-                    const UpcomingDays(),
+                    //UpcomingDays(forecast: _forecast),
+                    UpcomingDays(),
                     const SizedBox(height: 20),
 
                     // Bottom Section with Additional Info

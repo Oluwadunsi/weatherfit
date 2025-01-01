@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:weather_fit_app/models/weather_model.dart';
 
 class UpcomingDays extends StatelessWidget {
-  const UpcomingDays({Key? key}) : super(key: key);
+  //final WeatherForecast? forecast;
+  UpcomingDays({Key? key}) : super(key: key);
+
+  List<String> day = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
+  var now = DateTime.now();
+
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +23,7 @@ class UpcomingDays extends StatelessWidget {
           height: 120, // Adjusted height to prevent overflow
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: 5, // Number of forecast days
+            itemCount: 7, // Number of forecast days
             itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -29,11 +35,11 @@ class UpcomingDays extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Day ${index + 1}", style: const TextStyle(fontSize: 14)),
+                    Text(" ${ day[now.weekday + index]}", style: const TextStyle(fontSize: 14)),
                     const SizedBox(height: 8),
                     const Icon(Icons.wb_cloudy, size: 24),
                     const SizedBox(height: 8),
-                    const Text("25°C", style: TextStyle(fontSize: 14)),
+                    Text('0 C', style: TextStyle(fontSize: 14)),
                   ],
                 ),
               );

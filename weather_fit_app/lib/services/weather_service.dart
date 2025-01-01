@@ -18,7 +18,6 @@ class WeatherService {
     } else {
       val = '$BASEURL?q=$cityName&appid=$apikey&units=metric';
     }
-    print('city name: $cityName');
     final response = await http.get(Uri.parse(val));
     if (response.statusCode == 200) {
       print(response.body);
@@ -28,17 +27,17 @@ class WeatherService {
     }
   }
 
-  Future<WeatherModel> getSearchedWeather(String cityName) async {
+  /* Future<WeatherForecast> dailyForecast(String lat, String lon) async {
     final response = await http.get(
-      Uri.parse('$BASEURL?q=$cityName&appid=$apikey&units=metric'),
+      Uri.parse('https://api.openweathermap.org/data/2.5/forecast/daily?lat=$lat&lon=$lon&cnt=7&appid=$apikey&units=metric'),
     );
     if (response.statusCode == 200) {
       print(response.body);
-      return WeatherModel.fromJson(jsonDecode(response.body));
+      return WeatherForecast.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load weather data');
+      throw Exception('Failed to load weather forecast data');
     }
-  }
+  } */
 
   Future<String> getCountryCode() async {
     try {
