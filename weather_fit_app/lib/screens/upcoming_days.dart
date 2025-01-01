@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:weather_fit_app/models/weather_model.dart';
 
 class UpcomingDays extends StatelessWidget {
-  //final WeatherForecast? forecast;
   UpcomingDays({Key? key}) : super(key: key);
 
-  List<String> day = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
-  var now = DateTime.now();
-
+  final List<String> day = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
+  final now = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +33,15 @@ class UpcomingDays extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(" ${ day[now.weekday + index]}", style: const TextStyle(fontSize: 14)),
+                    // Fix is here: use modulo to avoid out-of-range
+                    Text(
+                      day[(now.weekday - 1 + index) % 7],
+                      style: const TextStyle(fontSize: 14),
+                    ),
                     const SizedBox(height: 8),
                     const Icon(Icons.wb_cloudy, size: 24),
                     const SizedBox(height: 8),
-                    Text('0 C', style: TextStyle(fontSize: 14)),
+                    const Text('0 C', style: TextStyle(fontSize: 14)),
                   ],
                 ),
               );

@@ -3,7 +3,7 @@ import 'package:weather_fit_app/models/weather_model.dart';
 import 'package:weather_fit_app/services/weather_service.dart';
 import 'package:weather_fit_app/screens/favorite_locations_page.dart';
 
-// Import your newly created widgets
+// Import your widgets
 import 'top_section.dart';
 import 'weather_info.dart';
 import 'outfit_suggestion.dart';
@@ -25,7 +25,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   WeatherModel? _weather;
   String _cityInput = "";
   String _currentLocation = "New York";
-  //WeatherForecast? _forecast;
+
   @override
   void initState() {
     super.initState();
@@ -33,59 +33,38 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   }
 
   Future<void> _getWeather() async {
-    String postalCode = await _weatherService.getPostalCode();
-    String countryCode = await _weatherService.getCountryCode();
     try {
-      final currentWeather = await _weatherService.getWeather(postalCode, countryCode, _cityInput);
-      //final dailyForecast = await _weatherService.dailyForecast("56.16", "15.58");
+      final currentWeather = await _weatherService.getWeather(
+        "10001", // Mock postal code
+        "US", // Mock country code
+        _cityInput,
+      );
       setState(() {
         _weather = currentWeather;
-        //_forecast = dailyForecast;
       });
-
-
     } catch (e) {
       print(e);
     }
   }
 
-  // Mock hourly data
-  List<Map<String, String>> _getHourlyData() {
-    return List.generate(12, (index) {
-      final hour = DateTime.now().add(Duration(hours: index));
-      return {
-        "time": "${hour.hour % 12 == 0 ? 12 : hour.hour % 12} ${hour.hour >= 12 ? 'PM' : 'AM'}",
-        "temp": "${20 + index}°C", // Example temperature
-        "icon": "sunny", // Placeholder for weather condition
-      };
-    });
-  }
-
-  // Determine background image
-  String _getBackgroundImage(String condition) {
-    switch (condition) {
-      case "sunny":
-        return "assets/sunny.jpg";
-      case "rainy":
+  String _getBackgroundImage(String? condition) {
+    switch (condition?.toLowerCase()) {
+      case "clear":
+        return "assets/clear.jpg";
+      case "rain":
         return "assets/rainy.jpg";
-      case "cloudy":
+      case "clouds":
         return "assets/cloudy.jpg";
+      case "snow":
+        return "assets/snowy.jpg";
       default:
         return "assets/clear.jpg";
     }
   }
 
   @override
-  void dispose() {
-    _favoriteLocations.dispose();
-    _searchLocation.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final hourlyData = _getHourlyData();
-    final currentCondition = "sunny"; // Replace with real condition dynamically
+    final currentCondition = _weather?.weatherCondition ?? "clear";
 
     return Scaffold(
       appBar: AppBar(
@@ -114,14 +93,20 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       ),
       body: Stack(
         children: [
-          // Background image
-          Image.asset(
-            _getBackgroundImage(currentCondition),
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
+          // Background image with overlay
+          Stack(
+            children: [
+              Image.asset(
+                _getBackgroundImage(currentCondition),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+              Container(
+                color: Colors.black.withOpacity(0.4),
+              ),
+            ],
           ),
-          // Foreground content
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -129,7 +114,6 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Top Section
                     TopSection(
                       favoriteLocations: _favoriteLocations,
                       currentLocation: _currentLocation,
@@ -142,25 +126,15 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       },
                     ),
                     const SizedBox(height: 20),
-
-                    // Weather Info
                     WeatherInfo(weather: _weather),
                     const SizedBox(height: 20),
-
-                    // Outfit Suggestion
-                    const OutfitSuggestion(),
+                    OutfitSuggestion(
+                      temperature: _weather?.temperature ?? 20.5,
+                      weatherCondition: _weather?.weatherCondition ?? "clear",
+                    ),
                     const SizedBox(height: 20),
-
-                    // Hourly Forecast
-                    HourlyForecast(hourlyData: hourlyData),
-                    const SizedBox(height: 20),
-
-                    // Upcoming Days
-                    //UpcomingDays(forecast: _forecast),
                     UpcomingDays(),
                     const SizedBox(height: 20),
-
-                    // Bottom Section with Additional Info
                     BottomSection(weather: _weather),
                   ],
                 ),
