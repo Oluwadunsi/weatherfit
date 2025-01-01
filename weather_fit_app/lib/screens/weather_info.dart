@@ -32,7 +32,7 @@ class WeatherInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                weather?.location ?? "N/A",
+                weather?.location ?? "loading location..",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -41,7 +41,7 @@ class WeatherInfo extends StatelessWidget {
               ),
               const SizedBox(height: 4), // Reduced spacing
               Text(
-                weather?.weatherCondition ?? "N/A",
+                weather?.weatherCondition ?? "loading temperature..",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,

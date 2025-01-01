@@ -34,9 +34,9 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   Future<void> _getWeather() async {
     try {
+      final Map<String, double> coordinates = await _weatherService.getCoordinates();
       final currentWeather = await _weatherService.getWeather(
-        "10001", // Mock postal code
-        "US", // Mock country code
+        coordinates,
         _cityInput,
       );
       setState(() {
@@ -45,6 +45,12 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     } catch (e) {
       print(e);
     }
+  }
+
+  void searchIconPressed() {
+    _cityInput = _searchLocation.text;
+    _searchLocation.clear();
+    _getWeather();
   }
 
   String _getBackgroundImage(String? condition) {
@@ -118,7 +124,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       favoriteLocations: _favoriteLocations,
                       currentLocation: _currentLocation,
                       searchLocation: _searchLocation,
-                      onSearchPressed: _getWeather,
+                      onSearchPressed: searchIconPressed,
                       onSearchSubmit: (value) {
                         setState(() => _cityInput = _searchLocation.text);
                         _getWeather();

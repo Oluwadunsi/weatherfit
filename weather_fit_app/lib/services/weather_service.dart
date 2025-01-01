@@ -11,10 +11,12 @@ class WeatherService {
 
   WeatherService(this.apikey);
 
-  Future<WeatherModel> getWeather(String postalCode, String countryCode, String cityName) async {
+  Future<WeatherModel> getWeather(Map<String, double> coordinate, String cityName) async {
     String val = '';
+    double? lat = coordinate["lat"];
+    double? lon = coordinate["lon"];
     if (cityName == "") {
-      val = '$BASEURL?zip=$postalCode,$countryCode&appid=$apikey&units=metric';
+      val = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
     } else {
       val = '$BASEURL?q=$cityName&appid=$apikey&units=metric';
     }
@@ -24,6 +26,27 @@ class WeatherService {
       return WeatherModel.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load weather data');
+    }
+  }
+
+  Future<Map<String, double>> getCoordinates() async {
+
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      const LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 100,
+      );
+
+      Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+      return {"lat": position.latitude, "lon": position.longitude};
+    } catch (e) {
+      // If there's any error (including null values), return empty string
+      return {"lat": 0.0, "lon": 0.0};
     }
   }
 
