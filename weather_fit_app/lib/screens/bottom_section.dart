@@ -8,10 +8,14 @@ class BottomSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataItems = [
-      {"title": "Wind Speed", "value": "10 km/h"}, // Mock data
+  // wind pressure is calculated using: P = 0.00256 * V^2
+  double value = 0.00256;
+  double speed = weather?.speed ?? 0.0 * 3.6; // wind speed from meter per second to kilometer per hour
+
+  final dataItems = [
+      {"title": "Wind Speed", "value": "${windSpeed} km/h"}, // Mock data
       {"title": "Humidity", "value": "${weather?.humidity ?? 'N/A'}%"},
-      {"title": "Pressure", "value": "1013 hPa"}, // Mock data
+      {"title": "Pressure", "value": "${weather?.pressure ?? 0} hPa"}, // Mock data
       {"title": "Feels Like", "value": "${weather?.feelsLikeTemperature.toStringAsFixed(1) ?? 'N/A'}°"},
     ];
 
