@@ -25,6 +25,20 @@ class WeatherModel {
   }
 }
 
+class AirQuality {
+  final double airQualityIndex;
+
+  AirQuality({
+    required this.airQualityIndex
+  });
+
+  factory AirQuality.fromJson(Map<String, dynamic> json) {
+    return AirQuality(
+        airQualityIndex: json['list'][0]['main']['aqi'].toDouble()
+    );
+  }
+}
+
 /* class WeatherForecast{
   final String sevenDayForecast;
 

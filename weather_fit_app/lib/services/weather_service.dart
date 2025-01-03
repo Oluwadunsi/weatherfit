@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/weather_model.dart';
+import '../models/weather_forecast.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
@@ -15,6 +16,7 @@ class WeatherService {
     String val = '';
     double? lat = coordinate["lat"];
     double? lon = coordinate["lon"];
+
     if (cityName == "") {
       val = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
     } else {
@@ -30,7 +32,6 @@ class WeatherService {
   }
 
   Future<Map<String, double>> getCoordinates() async {
-
     try {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -45,14 +46,30 @@ class WeatherService {
       Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       return {"lat": position.latitude, "lon": position.longitude};
     } catch (e) {
-      // If there's any error (including null values), return empty string
+      // If there's any error return 0.0
       return {"lat": 0.0, "lon": 0.0};
     }
   }
 
-  /* Future<WeatherForecast> dailyForecast(String lat, String lon) async {
+  Future<AirQuality> airQuality(Map<String, double> coordinate) async {
+    double? lat = coordinate["lat"];
+    double? lon = coordinate["lon"];
     final response = await http.get(
-      Uri.parse('https://api.openweathermap.org/data/2.5/forecast/daily?lat=$lat&lon=$lon&cnt=7&appid=$apikey&units=metric'),
+      Uri.parse('https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=$lat&lon=$lon&appid=$apikey&units=metric'),
+    );
+    if (response.statusCode == 200) {
+      print(response.body);
+      return AirQuality.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load weather forecast data');
+    }
+  }
+
+  Future<WeatherForecast> dailyForecast(Map<String, double> coordinate) async {
+    double? lat = coordinate["lat"];
+    double? lon = coordinate["lon"];
+    final response = await http.get(
+      Uri.parse('https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&appid=$apikey&units=metric'),
     );
     if (response.statusCode == 200) {
       print(response.body);
@@ -60,8 +77,8 @@ class WeatherService {
     } else {
       throw Exception('Failed to load weather forecast data');
     }
-  } */
-
+  }
+/*
   Future<String> getCountryCode() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -109,5 +126,5 @@ class WeatherService {
       // If there's any error (including null values), return empty string
       return "";
     }
-  }
+  } */
 }

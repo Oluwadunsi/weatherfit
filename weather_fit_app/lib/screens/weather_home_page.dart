@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weather_fit_app/models/weather_model.dart';
+import 'package:weather_fit_app/models/weather_forecast.dart';
 import 'package:weather_fit_app/services/weather_service.dart';
 import 'package:weather_fit_app/screens/favorite_locations_page.dart';
 
@@ -23,6 +24,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   final TextEditingController _searchLocation = TextEditingController();
   final ValueNotifier<List<String>> _favoriteLocations = ValueNotifier([]);
   WeatherModel? _weather;
+  WeatherForecast? _forecast;
+  AirQuality? _airQualityIndex;
   String _cityInput = "";
   String _currentLocation = "New York";
 
@@ -30,6 +33,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   void initState() {
     super.initState();
     _getWeather();
+    _dailyForecast();
+    _airQuality();
   }
 
   Future<void> _getWeather() async {
@@ -46,6 +51,30 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       print(e);
     }
   }
+
+  Future<void> _dailyForecast() async {
+    try {
+      final Map<String, double> coordinates = await _weatherService.getCoordinates();
+      final forecast = await _weatherService.dailyForecast(coordinates);
+      setState(() {
+        _forecast = forecast;
+      });
+    }
+    catch (e) {}
+  }
+
+  Future<void> _airQuality() async {
+    try {
+      final Map<String, double> coordinates = await _weatherService.getCoordinates();
+      final airQuality = await _weatherService.airQuality(coordinates);
+      setState(() {
+        _airQualityIndex = airQuality;
+      });
+    }
+    catch (e) {}
+  }
+
+
 
   void searchIconPressed() {
     _cityInput = _searchLocation.text;
@@ -132,14 +161,14 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    WeatherInfo(weather: _weather),
+                    WeatherInfo(weather: _weather, airQuality: _airQualityIndex),
                     const SizedBox(height: 20),
                     OutfitSuggestion(
                       temperature: _weather?.temperature ?? 20.5,
                       weatherCondition: _weather?.weatherCondition ?? "clear",
                     ),
                     const SizedBox(height: 20),
-                    UpcomingDays(),
+                    UpcomingDays(forecast: _forecast),
                     const SizedBox(height: 20),
                     BottomSection(weather: _weather),
                   ],

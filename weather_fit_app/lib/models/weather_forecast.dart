@@ -1,13 +1,17 @@
 class WeatherForecast{
-  final String name;
+  final double temperature;
+  final Map<String, dynamic> tempList;
+
 
   WeatherForecast({
-    required this.name
+    required this.temperature,
+    required this.tempList
   });
 
   factory WeatherForecast.fromJson(Map<String, dynamic> json) {
     return WeatherForecast(
-        name: json['name']
+      temperature: json['list'][4]['main']['temp'].toDouble(),
+      tempList: json
     );
   }
 }

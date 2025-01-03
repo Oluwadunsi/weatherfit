@@ -3,14 +3,15 @@ import 'package:weather_fit_app/models/weather_model.dart';
 
 class WeatherInfo extends StatelessWidget {
   final WeatherModel? weather;
+  final AirQuality? airQuality;
 
-  const WeatherInfo({Key? key, required this.weather}) : super(key: key);
+  const WeatherInfo({Key? key, required this.weather, required this.airQuality}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Mock data
     final String mockUvIndex = "Moderate"; // Replace with live data later
-    final String mockAirQuality = "Fair"; // Replace with live data later
+    final String mockAirQuality = '${airQuality?.airQualityIndex.toString()}'; // Replace with live data later
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8), // Reduced vertical padding
@@ -32,7 +33,7 @@ class WeatherInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                weather?.location ?? "loading location..",
+                weather?.location ?? "..",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -41,7 +42,7 @@ class WeatherInfo extends StatelessWidget {
               ),
               const SizedBox(height: 4), // Reduced spacing
               Text(
-                weather?.weatherCondition ?? "loading temperature..",
+                weather?.weatherCondition ?? "..",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
@@ -50,7 +51,7 @@ class WeatherInfo extends StatelessWidget {
               ),
               const SizedBox(height: 1), // Reduced spacing
               Text(
-                "${weather?.temperature.round() ?? 'N/A'}°",
+                  "${weather?.temperature.round() ?? '..'}°",
                 style: const TextStyle(
                   fontSize: 64,
                   fontWeight: FontWeight.bold,

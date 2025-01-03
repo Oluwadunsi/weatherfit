@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:weather_fit_app/models/weather_model.dart';
+import 'package:weather_fit_app/models/weather_forecast.dart';
 
 class UpcomingDays extends StatelessWidget {
-  UpcomingDays({Key? key}) : super(key: key);
+  final WeatherForecast? forecast;
+
+  UpcomingDays({Key? key, required this.forecast}) : super(key: key);
 
   final List<String> day = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
   final now = DateTime.now();
+
+  List<String> temp = [];
+  upcoming() async {
+    Map<String, dynamic>? upcomingDay = forecast?.tempList;
+    temp = upcomingDay?['list'][0]['weather'][0]['main'];
+    int len = upcomingDay?['list'].toLength();
+
+    for(int i = 0; i < 4; i++) {
+      temp.add(upcomingDay?['list'][i]['sys']['dt_txt']);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +34,7 @@ class UpcomingDays extends StatelessWidget {
           height: 120, // Adjusted height to prevent overflow
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: 7, // Number of forecast days
+            itemCount: 5, // Number of forecast days
             itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -35,15 +48,20 @@ class UpcomingDays extends StatelessWidget {
                   children: [
                     // Fix is here: use modulo to avoid out-of-range
                     Text(
-                      day[(now.weekday - 1 + index) % 7],
+                      day[(now.weekday - 1 + index) % 7], // start from the current day
                       style: const TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 8),
-                    const Icon(Icons.wb_cloudy, size: 24),
+                    Image.network(
+                      'http://openweathermap.org/img/w/${forecast?.tempList['list'][index*8]['weather'][0]['icon']}.png',
+                      width: 40,
+                      height: 20,
+                    ),
                     const SizedBox(height: 8),
-                    const Text('0 C', style: TextStyle(fontSize: 14)),
+                    // upcoming weather from today to the next 4 days
+                    Text('${forecast?.tempList['list'][index * 8]['main']['temp'].round()}°', style: TextStyle(fontSize: 14)),
                   ],
-                ),
+                )
               );
             },
           ),
