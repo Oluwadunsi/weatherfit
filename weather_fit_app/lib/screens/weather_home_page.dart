@@ -39,7 +39,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   Future<void> _getWeather() async {
     try {
-      final Map<String, double> coordinates = await _weatherService.getCoordinates();
+      final Map<String, double> coordinates = await _weatherService.getCoordinates(_cityInput);
       final currentWeather = await _weatherService.getWeather(
         coordinates,
         _cityInput,
@@ -54,7 +54,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   Future<void> _dailyForecast() async {
     try {
-      final Map<String, double> coordinates = await _weatherService.getCoordinates();
+      final Map<String, double> coordinates = await _weatherService.getCoordinates(_cityInput);
       final forecast = await _weatherService.dailyForecast(coordinates);
       setState(() {
         _forecast = forecast;
@@ -65,7 +65,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   Future<void> _airQuality() async {
     try {
-      final Map<String, double> coordinates = await _weatherService.getCoordinates();
+      final Map<String, double> coordinates = await _weatherService.getCoordinates(_cityInput);
       final airQuality = await _weatherService.airQuality(coordinates);
       setState(() {
         _airQualityIndex = airQuality;
@@ -80,6 +80,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     _cityInput = _searchLocation.text;
     _searchLocation.clear();
     _getWeather();
+    _airQuality();
+    _dailyForecast();
   }
 
   String _getBackgroundImage(String? condition) {
@@ -157,6 +159,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       onSearchSubmit: (value) {
                         setState(() => _cityInput = _searchLocation.text);
                         _getWeather();
+                        _dailyForecast();
+                        _airQuality();
                         _searchLocation.clear();
                       },
                     ),

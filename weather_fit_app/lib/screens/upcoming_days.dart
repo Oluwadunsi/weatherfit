@@ -59,7 +59,7 @@ class UpcomingDays extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     // upcoming weather from today to the next 4 days
-                    Text('${forecast?.tempList['list'][index * 8]['main']['temp'].round()}°', style: TextStyle(fontSize: 14)),
+                    Text('${forecast?.tempList['list'][index * 8]['main']['temp'].toDouble().round()}°', style: TextStyle(fontSize: 14)),
                   ],
                 )
               );
