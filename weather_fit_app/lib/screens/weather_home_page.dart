@@ -89,7 +89,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       case "clear":
         return "assets/clear.jpg";
       case "rain":
-        return "assets/rainy.jpg";
+        return "assets/rainy.jpeg";
       case "clouds":
         return "assets/cloudy.jpg";
       case "snow":

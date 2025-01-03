@@ -13,7 +13,7 @@ class BottomSection extends StatelessWidget {
   double speed = weather?.speed ?? 0.0 * 3.6; // wind speed from meter per second to kilometer per hour
 
   final dataItems = [
-      {"title": "Wind Speed", "value": "${windSpeed} km/h"}, // Mock data
+      {"title": "Wind Speed", "value": "${weather?.speed} km/h"}, // Mock data
       {"title": "Humidity", "value": "${weather?.humidity ?? 'N/A'}%"},
       {"title": "Pressure", "value": "${weather?.pressure ?? 0} hPa"}, // Mock data
       {"title": "Feels Like", "value": "${weather?.feelsLikeTemperature.toStringAsFixed(1) ?? 'N/A'}°"},

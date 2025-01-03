@@ -44,6 +44,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -59,7 +61,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/snowy.jpg
-    - assets/rainy.jpg
+    - assets/rainy.jpeg
     - assets/cloudy.jpg
     - assets/clear.jpg
 
