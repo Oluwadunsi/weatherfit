@@ -13,14 +13,16 @@ import 'upcoming_days.dart';
 import 'bottom_section.dart';
 
 class WeatherHomePage extends StatefulWidget {
-  const WeatherHomePage({Key? key}) : super(key: key);
+  final WeatherService? service; // Accept service via constructor
+
+  const WeatherHomePage({Key? key, this.service}) : super(key: key);
 
   @override
   State<WeatherHomePage> createState() => _WeatherHomePageState();
 }
 
 class _WeatherHomePageState extends State<WeatherHomePage> {
-  final _weatherService = WeatherService('3df683afc2a8c5ffaad3c79a3cebe230');
+  late WeatherService _weatherService;
   final TextEditingController _searchLocation = TextEditingController();
   final ValueNotifier<List<String>> _favoriteLocations = ValueNotifier([]);
   WeatherModel? _weather;
@@ -32,6 +34,12 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   @override
   void initState() {
     super.initState();
+    // Use the provided service or default to a new WeatherService instance
+    _weatherService = widget.service ?? WeatherService('3df683afc2a8c5ffaad3c79a3cebe230');
+    _initializeData();
+  }
+
+  void _initializeData() {
     _getWeather();
     _dailyForecast();
     _airQuality();
@@ -40,15 +48,12 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   Future<void> _getWeather() async {
     try {
       final Map<String, double> coordinates = await _weatherService.getCoordinates(_cityInput);
-      final currentWeather = await _weatherService.getWeather(
-        coordinates,
-        _cityInput,
-      );
+      final currentWeather = await _weatherService.getWeather(coordinates, _cityInput);
       setState(() {
         _weather = currentWeather;
       });
     } catch (e) {
-      print(e);
+      print('Error fetching weather: $e');
     }
   }
 
@@ -56,11 +61,13 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     try {
       final Map<String, double> coordinates = await _weatherService.getCoordinates(_cityInput);
       final forecast = await _weatherService.dailyForecast(coordinates);
+
       setState(() {
         _forecast = forecast;
       });
+    } catch (e) {
+      print('Error fetching forecast: $e');
     }
-    catch (e) {}
   }
 
   Future<void> _airQuality() async {
@@ -70,18 +77,17 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       setState(() {
         _airQualityIndex = airQuality;
       });
+    } catch (e) {
+      print('Error fetching air quality: $e');
     }
-    catch (e) {}
   }
 
-
-
   void searchIconPressed() {
-    _cityInput = _searchLocation.text;
-    _searchLocation.clear();
-    _getWeather();
-    _airQuality();
-    _dailyForecast();
+    setState(() {
+      _cityInput = _searchLocation.text;
+      _searchLocation.clear();
+      _initializeData();
+    });
   }
 
   String _getBackgroundImage(String? condition) {
@@ -157,11 +163,10 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                       searchLocation: _searchLocation,
                       onSearchPressed: searchIconPressed,
                       onSearchSubmit: (value) {
-                        setState(() => _cityInput = _searchLocation.text);
-                        _getWeather();
-                        _dailyForecast();
-                        _airQuality();
-                        _searchLocation.clear();
+                        setState(() {
+                          _cityInput = value;
+                          _initializeData();
+                        });
                       },
                     ),
                     const SizedBox(height: 20),

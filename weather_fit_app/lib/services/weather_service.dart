@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/weather_model.dart';
@@ -7,85 +6,133 @@ import '../models/weather_forecast.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  final BASEURL = 'https://api.openweathermap.org/data/2.5/weather';
+  final String BASEURL = 'https://api.openweathermap.org/data/2.5/weather';
   final String apikey;
 
   WeatherService(this.apikey);
 
   Future<WeatherModel> getWeather(Map<String, double> coordinate, String cityName) async {
-    String val = '';
-    double? lat = coordinate["lat"];
-    double? lon = coordinate["lon"];
+    try {
+      String url = '';
+      double? lat = coordinate["lat"];
+      double? lon = coordinate["lon"];
 
-    if (cityName == "") {
-      val = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
-    } else {
-      val = '$BASEURL?q=$cityName&appid=$apikey&units=metric';
-    }
-    final response = await http.get(Uri.parse(val));
-    if (response.statusCode == 200) {
-      return WeatherModel.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load weather data');
+      if (cityName.isEmpty) {
+        url = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
+      } else {
+        url = '$BASEURL?q=$cityName&appid=$apikey&units=metric';
+      }
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['main'] != null && data['weather'] != null) {
+          return WeatherModel.fromJson(data);
+        } else {
+          throw Exception('Invalid weather data structure');
+        }
+      } else {
+        throw Exception('Failed to load weather data: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error in getWeather: $e');
+      rethrow;
     }
   }
 
-  Future<Map<String, double>> getCoordinates(cityName) async {
-    if(cityName != ""){
-      final response = await http.get(Uri.parse('$BASEURL?q=$cityName&appid=$apikey&units=metric'));
-      if (response.statusCode == 200) {
-        Map<String, dynamic> temp = jsonDecode(response.body);
-        return {"lat": temp['coord']['lat'], "lon": temp['coord']['lon']};
-      } else {
-        throw Exception('Failed to load weather data');
-      }
-    } else {
-      try {
-        LocationPermission permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
+  Future<Map<String, double>> getCoordinates(String cityName) async {
+    try {
+      if (cityName.isNotEmpty) {
+        final response = await http.get(Uri.parse('$BASEURL?q=$cityName&appid=$apikey&units=metric'));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['coord'] != null) {
+            return {"lat": data['coord']['lat'], "lon": data['coord']['lon']};
+          } else {
+            throw Exception('Invalid coordinates data structure');
+          }
+        } else {
+          throw Exception('Failed to fetch coordinates: ${response.reasonPhrase}');
         }
-
-        const LocationSettings locationSettings = LocationSettings(
-          accuracy: LocationAccuracy.best,
-          distanceFilter: 100,
-        );
-
-        Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-        return {"lat": position.latitude, "lon": position.longitude};
-      } catch (e) {
-        // If there's any error return 0.0
-        return {"lat": 0.0, "lon": 0.0};
+      } else {
+        return await _getCurrentLocation();
       }
+    } catch (e) {
+      print('Error in getCoordinates: $e');
+      return {"lat": 0.0, "lon": 0.0}; // Return default values for fallback
     }
+  }
 
+  Future<Map<String, double>> _getCurrentLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permission denied');
+        }
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+      );
+
+      return {"lat": position.latitude, "lon": position.longitude};
+    } catch (e) {
+      print('Error in _getCurrentLocation: $e');
+      throw Exception('Failed to fetch current location');
+    }
   }
 
   Future<AirQuality> airQuality(Map<String, double> coordinate) async {
-    double? lat = coordinate["lat"];
-    double? lon = coordinate["lon"];
-    final response = await http.get(
-      Uri.parse('https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=$lat&lon=$lon&appid=$apikey&units=metric'),
-    );
-    if (response.statusCode == 200) {
-      return AirQuality.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load weather forecast data');
+    try {
+      double? lat = coordinate["lat"];
+      double? lon = coordinate["lon"];
+      final response = await http.get(
+        Uri.parse('https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=$lat&lon=$lon&appid=$apikey&units=metric'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['list'] != null) {
+          return AirQuality.fromJson(data);
+        } else {
+          throw Exception('Invalid air quality data structure');
+        }
+      } else {
+        throw Exception('Failed to load air quality data: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error in airQuality: $e');
+      rethrow;
     }
   }
 
   Future<WeatherForecast> dailyForecast(Map<String, double> coordinate) async {
-    double? lat = coordinate["lat"];
-    double? lon = coordinate["lon"];
-    final response = await http.get(
-      Uri.parse('https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&appid=$apikey&units=metric'),
-    );
-    if (response.statusCode == 200) {
-      return WeatherForecast.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load weather forecast data');
+    try {
+      double? lat = coordinate["lat"];
+      double? lon = coordinate["lon"];
+      final response = await http.get(
+        Uri.parse('https://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$lon&appid=$apikey&units=metric'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['list'] != null) {
+          return WeatherForecast.fromJson(data);
+        } else {
+          throw Exception('Invalid forecast data structure');
+        }
+      } else {
+        throw Exception('Failed to load forecast data: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error in dailyForecast: $e');
+      rethrow;
     }
   }
+
 /*
   Future<String> getCountryCode() async {
     try {
