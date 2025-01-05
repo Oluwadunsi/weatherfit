@@ -14,9 +14,9 @@ class BottomSection extends StatelessWidget {
 
   final dataItems = [
       {"title": "Wind Speed", "value": "${weather?.speed} km/h"}, // Mock data
-      {"title": "Humidity", "value": "${weather?.humidity ?? 'N/A'}%"},
+      {"title": "Humidity", "value": "${weather?.humidity ?? '0'}%"},
       {"title": "Pressure", "value": "${weather?.pressure ?? 0} hPa"}, // Mock data
-      {"title": "Feels Like", "value": "${weather?.feelsLikeTemperature.toStringAsFixed(1) ?? 'N/A'}°"},
+      {"title": "Feels Like", "value": "${weather?.feelsLikeTemperature.round() ?? 'N/A'}°"},
     ];
 
     return Container(

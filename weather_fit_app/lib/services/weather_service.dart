@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../models/weather_model.dart';
@@ -16,6 +19,7 @@ class WeatherService {
     String val = '';
     double? lat = coordinate["lat"];
     double? lon = coordinate["lon"];
+    print("City name $cityName ");
 
     if (cityName == "") {
       val = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
@@ -30,35 +34,39 @@ class WeatherService {
     }
   }
 
-  Future<Map<String, double>> getCoordinates(cityName) async {
-    if(cityName != ""){
-      final response = await http.get(Uri.parse('$BASEURL?q=$cityName&appid=$apikey&units=metric'));
-      if (response.statusCode == 200) {
-        Map<String, dynamic> temp = jsonDecode(response.body);
-        return {"lat": temp['coord']['lat'], "lon": temp['coord']['lon']};
-      } else {
-        throw Exception('Failed to load weather data');
-      }
-    } else {
-      try {
-        LocationPermission permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
-          permission = await Geolocator.requestPermission();
-        }
-
-        const LocationSettings locationSettings = LocationSettings(
-          accuracy: LocationAccuracy.best,
-          distanceFilter: 100,
-        );
-
-        Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-        return {"lat": position.latitude, "lon": position.longitude};
-      } catch (e) {
-        // If there's any error return 0.0
-        return {"lat": 0.0, "lon": 0.0};
-      }
+  Future<void> getLocationPermission({Future Function(Map<String, double>)? onLocationPermitted, VoidCallback? onLocationRejected}) async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
     }
 
+    if ((permission == LocationPermission.denied || permission == LocationPermission.deniedForever) && onLocationRejected != null ) {
+      onLocationRejected();
+      return;
+    }
+    if((permission == LocationPermission.always || permission == LocationPermission.whileInUse) && onLocationPermitted != null){
+      const LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 100,
+      );
+
+      Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+      var a =  {"lat": position.latitude, "lon": position.longitude};
+      await onLocationPermitted(a);
+    }
+  }
+
+  Future<Map<String, double>?> getCoordinates(String cityName) async {
+    if(cityName == "") return null;
+    var uri = Uri.parse('$BASEURL?q=$cityName&appid=$apikey&units=metric');
+    log("About to call -- ${uri.toString()}");
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> temp = jsonDecode(response.body);
+      return {"lat": temp['coord']['lat'], "lon": temp['coord']['lon']};
+    } else {
+      throw Exception('Failed to load weather data');
+    }
   }
 
   Future<AirQuality> airQuality(Map<String, double> coordinate) async {

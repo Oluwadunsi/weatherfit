@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weather_fit_app/screens/weather_home_page.dart';
 
-class FavoriteLocationsPage extends StatelessWidget {
-  final ValueNotifier<List<String>> favoriteLocations;
-  final Function(String) onRemove;
+import '../bloc/app_state.dart';
 
-  const FavoriteLocationsPage({
-    Key? key,
-    required this.favoriteLocations,
-    required this.onRemove,
-  }) : super(key: key);
+class FavoriteLocationsPage extends ConsumerWidget {
+
+  const FavoriteLocationsPage(
+      {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    var app = ref.watch(appState);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Favorite Locations"),
@@ -19,57 +19,56 @@ class FavoriteLocationsPage extends StatelessWidget {
       ),
       body: Container(
         color: Colors.blue[50], // Subtle background color
-        child: ValueListenableBuilder<List<String>>(
-          valueListenable: favoriteLocations,
-          builder: (context, locations, child) {
-            return locations.isEmpty
-                ? Center(
-              child: Text(
-                "No favorite locations added yet.",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[700],
-                ),
+        child: app.favourites.isEmpty
+            ? Center(
+          child: Text(
+            "No favorite locations added yet.",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+        )
+            : ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: app.favourites.length,
+          itemBuilder: (context, index) {
+            final location = app.favourites[index];
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-            )
-                : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: locations.length,
-              itemBuilder: (context, index) {
-                final location = locations[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              elevation: 4,
+              child: ListTile(
+                leading: const Icon(
+                  Icons.location_on,
+                  color: Colors.blue,
+                ),
+                title: Text(
+                  location,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
                   ),
-                  elevation: 4,
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.location_on,
-                      color: Colors.blue,
-                    ),
-                    title: Text(
-                      location,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        onRemove(location);
-                        favoriteLocations.notifyListeners();
-                      },
-                    ),
-                    onTap: () {
-                      // Navigate to the weather page for the selected location
-                      Navigator.pop(context, location);
-                    },
-                  ),
-                );
-              },
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    app.removeFavourite(location);
+                  },
+                ),
+                onTap: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => WeatherHomePage(
+                          city: location,
+                        )),
+                        (route) => false,
+                  );
+                },
+              ),
             );
           },
         ),
