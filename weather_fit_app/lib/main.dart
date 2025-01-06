@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weather_fit_app/screens/weather_home_page.dart';
+import 'package:weather_fit_app/services/weather_service.dart';
+import 'package:weather_fit_app/test/mocks/mock_weather_service.dart';
 
-void main() {
+void main({MockWeatherService? service}) {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final WeatherService? service;
+
+  const MyApp({Key? key, this.service}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: WeatherHomePage(),
+      home: WeatherHomePage(service: service),
     );
   }
 }

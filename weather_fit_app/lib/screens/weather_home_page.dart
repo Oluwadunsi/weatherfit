@@ -17,9 +17,10 @@ import 'upcoming_days.dart';
 import 'bottom_section.dart';
 
 class WeatherHomePage extends ConsumerStatefulWidget {
-  const WeatherHomePage({super.key, this.city});
+  const WeatherHomePage({Key? key, this.city, this.service}) : super(key: key);
 
   final String? city;
+  final WeatherService? service; // Accept service via constructor
 
   @override
   ConsumerState<WeatherHomePage> createState() => _WeatherHomePageState();
@@ -38,8 +39,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   @override
   void initState() {
     super.initState();
-    if(widget.city == null) initialize();
-    if(widget.city != null) searchIconPressed(initial: widget.city);
+    if (widget.city == null) initialize();
+    if (widget.city != null) searchIconPressed(initial: widget.city);
   }
 
   Future<void> initialize() async {
@@ -80,6 +81,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
       final Map<String, double> coordinates =
           await _weatherService.getCoordinates(_cityInput) ?? location!;
       final forecast = await _weatherService.dailyForecast(coordinates);
+
       setState(() {
         _forecast = forecast;
       });
@@ -184,7 +186,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                             favoriteLocations: app.favourites,
                             currentLocation: _currentLocation,
                             searchLocation: _searchLocation,
-                            onSearchPressed: () async => await searchIconPressed(),
+                            onSearchPressed: () async =>
+                                await searchIconPressed(),
                             onSearchSubmit: (value) {
                               setState(() => _cityInput = _searchLocation.text);
                               _getWeather();
@@ -193,7 +196,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                               _searchLocation.clear();
                             },
                             onFavouriteChanged: (value) {
-                              if(value) {
+                              if (value) {
                                 app.removeFavourite(_currentLocation);
                               } else {
                                 app.addFavourite = _currentLocation;
