@@ -43,6 +43,8 @@ dependencies:
   hooks_riverpod: ^2.6.1
   flutter_hooks: ^0.20.5
   sizer: any
+  async_preferences: ^1.0.1
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:

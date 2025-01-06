@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weather_fit_app/bloc/app_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:weather_fit_app/models/weather_model.dart';
 import 'package:weather_fit_app/models/weather_forecast.dart';
 import 'package:weather_fit_app/services/weather_service.dart';
@@ -39,8 +40,17 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   @override
   void initState() {
     super.initState();
+    _loadSavedFavoriteLocation();
     if (widget.city == null) initialize();
     if (widget.city != null) searchIconPressed(initial: widget.city);
+  }
+
+  List<String>? favouriteLocation = [];
+  void _loadSavedFavoriteLocation() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      favouriteLocation = preferences.getStringList("favourite");
+    });
   }
 
   Future<void> initialize() async {
@@ -126,6 +136,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   Widget build(BuildContext context) {
     var app = ref.watch(appState);
     final currentCondition = _weather?.weatherCondition ?? "clear";
+    List<String> temp  = [];
+    app.loadSavedFavoriteLocation(favouriteLocation ?? temp);
 
     return Scaffold(
       appBar: AppBar(
@@ -198,8 +210,10 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                             onFavouriteChanged: (value) {
                               if (value) {
                                 app.removeFavourite(_currentLocation);
+                                app.loadSavedFavoriteLocation(temp!);
                               } else {
                                 app.addFavourite = _currentLocation;
+                                app.loadSavedFavoriteLocation(temp!);
                               }
                             },
                           ),
