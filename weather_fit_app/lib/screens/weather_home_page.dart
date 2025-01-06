@@ -210,10 +210,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                             onFavouriteChanged: (value) {
                               if (value) {
                                 app.removeFavourite(_currentLocation);
-                                app.loadSavedFavoriteLocation(temp!);
                               } else {
                                 app.addFavourite = _currentLocation;
-                                app.loadSavedFavoriteLocation(temp!);
                               }
                             },
                           ),

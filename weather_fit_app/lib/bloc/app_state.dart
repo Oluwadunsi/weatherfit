@@ -17,14 +17,14 @@ class AppState extends ChangeNotifier {
 
   set addFavourite(String value) {
     _favourites.add(value);
-    _saveFavouriteLocation();
+   _saveFavouriteLocation();
     notifyListeners();
   }
 
   void removeFavourite(String value) {
     _favourites.remove(value);
-    _removeFavouriteLocation();
-    _saveFavouriteLocation();
+   _removeFavouriteLocation();
+   _saveFavouriteLocation();
     notifyListeners();
   }
 
