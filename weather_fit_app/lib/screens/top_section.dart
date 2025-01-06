@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class TopSection extends StatelessWidget {
+class TopSection extends StatefulWidget {
   final List<String> favoriteLocations;
   final String currentLocation;
   final TextEditingController searchLocation;
@@ -19,8 +19,14 @@ class TopSection extends StatelessWidget {
   });
 
   @override
+  State<TopSection> createState() => _TopSectionState();
+}
+
+class _TopSectionState extends State<TopSection> {
+  @override
   Widget build(BuildContext context) {
-    final isFavorited = favoriteLocations.contains(currentLocation);
+    final isFavorited =
+        widget.favoriteLocations.contains(widget.currentLocation);
     return Row(
       children: [
         IconButton(
@@ -28,14 +34,15 @@ class TopSection extends StatelessWidget {
             isFavorited ? Icons.favorite : Icons.favorite_border,
             color: isFavorited ? Colors.red : null,
           ),
-          onPressed: () => onFavouriteChanged(isFavorited),
+          onPressed: () => widget.onFavouriteChanged(isFavorited),
         ),
         Expanded(
           child: TextField(
-            controller: searchLocation,
+            controller: widget.searchLocation,
             decoration: InputDecoration(
+                contentPadding: EdgeInsets.only(left: 2),
                 prefixIcon: IconButton(
-                  onPressed: onSearchPressed,
+                  onPressed: widget.onSearchPressed,
                   icon: const Icon(Icons.search),
                 ),
                 hintText: "search city",
@@ -43,7 +50,7 @@ class TopSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.black)),
                 constraints: BoxConstraints.tightFor(height: 40)),
-            onSubmitted: onSearchSubmit,
+            onSubmitted: widget.onSearchSubmit,
           ),
         ),
       ],

@@ -36,6 +36,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   String _cityInput = "";
   String _currentLocation = "";
   Map<String, double>? location;
+  List<String>? favouriteLocation = [];
 
   @override
   void initState() {
@@ -45,7 +46,6 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     if (widget.city != null) searchIconPressed(initial: widget.city);
   }
 
-  List<String>? favouriteLocation = [];
   void _loadSavedFavoriteLocation() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
@@ -140,101 +140,85 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     app.loadSavedFavoriteLocation(favouriteLocation ?? temp);
 
     return Scaffold(
+      drawer: Drawer(width: 320, child: FavoriteLocationsPage()),
       appBar: AppBar(
-        title: const Text("Weather Styles"),
+        title: const Text(
+          "Weather Styles",
+          style: TextStyle(fontSize: 17),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue,
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FavoriteLocationsPage(),
-                ),
-              );
-            },
-            child:
-            const Text("Favorites", style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
       body: location == null
-          ? ListView(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        children: const [
-          Text(
-            "Loading...",
-            style: TextStyle(
-              fontSize: 12,
-            ),
-          ),
-        ],
-      )
+          ? const Center(
+              child: Text(
+                "Loading...",
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            )
           : Stack(
-        children: [
-          // Background image with overlay
-          Stack(
-            children: [
-              Image.asset(
-                _getBackgroundImage(currentCondition),
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-              Container(
-                color: Colors.black.withOpacity(0.4),
-              ),
-            ],
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Background image with overlay
+                Stack(
                   children: [
-                    TopSection(
-                      favoriteLocations: app.favourites,
-                      currentLocation: _currentLocation,
-                      searchLocation: _searchLocation,
-                      onSearchPressed: () async =>
-                      await searchIconPressed(),
-                      onSearchSubmit: (value) {
-                        setState(() => _cityInput = _searchLocation.text);
-                        _getWeather();
-                        _dailyForecast();
-                        _airQuality();
-                        _searchLocation.clear();
-                      },
-                      onFavouriteChanged: (value) {
-                        if (value) {
-                          app.removeFavourite(_currentLocation);
-                        } else {
-                          app.addFavourite = _currentLocation;
-                        }
-                      },
+                    Image.asset(
+                      _getBackgroundImage(currentCondition),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
-                    const SizedBox(height: 20),
-                    WeatherInfo(
-                        weather: _weather, airQuality: _airQualityIndex),
-                    const SizedBox(height: 20),
-                    OutfitSuggestion(
-                      temperature: _weather?.temperature ?? 20.5,
-                      weatherCondition:
-                      _weather?.weatherCondition ?? "clear",
+                    Container(
+                      color: Colors.black.withOpacity(0.4),
                     ),
-                    const SizedBox(height: 20),
-                    UpcomingDays(forecast: _forecast),
-                    const SizedBox(height: 20),
-                    BottomSection(weather: _weather),
                   ],
                 ),
-              ),
+                SafeArea(
+                    child: SingleChildScrollView(
+                        child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TopSection(
+                        favoriteLocations: favouriteLocation ?? [],
+                        currentLocation: _currentLocation,
+                        searchLocation: _searchLocation,
+                        onSearchPressed: () async => await searchIconPressed(),
+                        onSearchSubmit: (value) {
+                          setState(() => _cityInput = _searchLocation.text);
+                          _getWeather();
+                          _dailyForecast();
+                          _airQuality();
+                          _searchLocation.clear();
+                        },
+                        onFavouriteChanged: (value) {
+                          if (value) {
+                            app.removeFavourite(_currentLocation);
+                          } else {
+                            app.addFavourite = _currentLocation;
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      WeatherInfo(
+                          weather: _weather, airQuality: _airQualityIndex),
+                      const SizedBox(height: 20),
+                      OutfitSuggestion(
+                        temperature: _weather?.temperature ?? 20.5,
+                        weatherCondition: _weather?.weatherCondition ?? "clear",
+                      ),
+                      const SizedBox(height: 20),
+                      UpcomingDays(forecast: _forecast),
+                      const SizedBox(height: 20),
+                      BottomSection(weather: _weather),
+                    ],
+                  ),
+                ))),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

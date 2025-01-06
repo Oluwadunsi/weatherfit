@@ -10,30 +10,30 @@ class WeatherInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Mock data
-    final String mockUvIndex = "Moderate"; // Replace with live data later
-    final String mockAirQuality = '${airQuality?.airQualityIndex.toString()}'; // Replace with live data later
+    final String feelsLike = '${weather?.feelsLikeTemperature.round()}°'; // Replace with live data later
+    final String locationAirQuality = '${airQuality?.airQualityIndex.toString()}'; // Replace with live data later
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8), // Reduced vertical padding
+      padding: const EdgeInsets.symmetric(vertical: 1), // Reduced vertical padding
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // UV Index and Air Quality Section
+          // Feels like temperature and Air Quality Section
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildCompactInfoCard("UV Index", mockUvIndex),
+              _buildCompactInfoCard("Feels like", feelsLike,),
               const SizedBox(height: 6), // Slight spacing between cards
-              _buildCompactInfoCard("Air Quality", mockAirQuality),
+              _buildCompactInfoCard("Air Quality", locationAirQuality),
             ],
           ),
           // Location, Weather Condition, and Temperature Section
           Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+           // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                weather?.location ?? "..",
+                weather?.location ?? "",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -42,7 +42,7 @@ class WeatherInfo extends StatelessWidget {
               ),
               const SizedBox(height: 4), // Reduced spacing
               Text(
-                weather?.weatherCondition ?? "..",
+                weather?.weatherCondition ?? "",
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
@@ -51,7 +51,7 @@ class WeatherInfo extends StatelessWidget {
               ),
               const SizedBox(height: 1), // Reduced spacing
               Text(
-                  "${weather?.temperature.round() ?? '..'}°",
+                  "${weather?.temperature.round() ?? ''}°",
                 style: const TextStyle(
                   fontSize: 64,
                   fontWeight: FontWeight.bold,

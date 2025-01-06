@@ -14,7 +14,7 @@ class FavoriteLocationsPage extends ConsumerWidget {
     var app = ref.watch(appState);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Favorite Locations"),
+        title: const Text("Favourite Locations"),
         backgroundColor: Colors.blue,
       ),
       body: Container(
@@ -49,7 +49,7 @@ class FavoriteLocationsPage extends ConsumerWidget {
                 title: Text(
                   location,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
