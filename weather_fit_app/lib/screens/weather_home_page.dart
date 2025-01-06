@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weather_fit_app/bloc/app_state.dart';
@@ -8,8 +7,6 @@ import 'package:weather_fit_app/models/weather_model.dart';
 import 'package:weather_fit_app/models/weather_forecast.dart';
 import 'package:weather_fit_app/services/weather_service.dart';
 import 'package:weather_fit_app/screens/favorite_locations_page.dart';
-
-// Import your widgets
 import 'top_section.dart';
 import 'weather_info.dart';
 import 'outfit_suggestion.dart';
@@ -21,7 +18,7 @@ class WeatherHomePage extends ConsumerStatefulWidget {
   const WeatherHomePage({Key? key, this.city, this.service}) : super(key: key);
 
   final String? city;
-  final WeatherService? service; // Accept service via constructor
+  final WeatherService? service;
 
   @override
   ConsumerState<WeatherHomePage> createState() => _WeatherHomePageState();
@@ -37,6 +34,10 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   String _currentLocation = "";
   Map<String, double>? location;
 
+  List<String>? favouriteLocation = [];
+  List<String> _citySuggestions = []; // City suggestions for dropdown
+  bool _isLoadingSuggestions = false; // Suggestion loading indicator
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +46,6 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     if (widget.city != null) searchIconPressed(initial: widget.city);
   }
 
-  List<String>? favouriteLocation = [];
   void _loadSavedFavoriteLocation() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
@@ -114,7 +114,19 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _cityInput = initial ?? _searchLocation.text.trim();
     _currentLocation = _cityInput;
     _searchLocation.clear();
+
+    // Clear the suggestions list
+    setState(() {
+      _citySuggestions = [];
+    });
+
     await initialize();
+  }
+
+  Future<void> fetchSuggestions(String query) async {
+    setState(() => _isLoadingSuggestions = true);
+    _citySuggestions = await _weatherService.getCitySuggestions(query);
+    setState(() => _isLoadingSuggestions = false);
   }
 
   String _getBackgroundImage(String? condition) {
@@ -136,7 +148,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   Widget build(BuildContext context) {
     var app = ref.watch(appState);
     final currentCondition = _weather?.weatherCondition ?? "clear";
-    List<String> temp  = [];
+    List<String> temp = [];
     app.loadSavedFavoriteLocation(favouriteLocation ?? temp);
 
     return Scaffold(
@@ -155,86 +167,92 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
               );
             },
             child:
-                const Text("Favorites", style: TextStyle(color: Colors.white)),
+            const Text("Favorites", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
       body: location == null
           ? ListView(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-              children: const [
-                Text(
-                  "Loading...",
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            )
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        children: const [
+          Text(
+            "Loading...",
+            style: TextStyle(
+              fontSize: 12,
+            ),
+          ),
+        ],
+      )
           : Stack(
-              children: [
-                // Background image with overlay
-                Stack(
+        children: [
+          Stack(
+            children: [
+              Image.asset(
+                _getBackgroundImage(currentCondition),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+              Container(
+                color: Colors.black.withOpacity(0.4),
+              ),
+            ],
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Image.asset(
-                      _getBackgroundImage(currentCondition),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
+                    TopSection(
+                      favoriteLocations: app.favourites,
+                      currentLocation: _currentLocation,
+                      searchLocation: _searchLocation,
+                      onSearchPressed: () async =>
+                      await searchIconPressed(),
+                      onSearchSubmit: (value) {
+                        setState(() {
+                          _cityInput = _searchLocation.text;
+                          _citySuggestions =
+                          []; // Clear the suggestions list
+                        });
+                        _getWeather();
+                        _dailyForecast();
+                        _airQuality();
+                        _searchLocation.clear();
+                      },
+                      onFavouriteChanged: (value) {
+                        if (value) {
+                          app.removeFavourite(_currentLocation);
+                        } else {
+                          app.addFavourite = _currentLocation;
+                        }
+                      },
+                      onInputChanged: fetchSuggestions,
+                      citySuggestions: _citySuggestions,
+                      isLoadingSuggestions: _isLoadingSuggestions,
                     ),
-                    Container(
-                      color: Colors.black.withOpacity(0.4),
+                    const SizedBox(height: 20),
+                    WeatherInfo(
+                        weather: _weather, airQuality: _airQualityIndex),
+                    const SizedBox(height: 20),
+                    OutfitSuggestion(
+                      temperature: _weather?.temperature ?? 20.5,
+                      weatherCondition:
+                      _weather?.weatherCondition ?? "clear",
                     ),
+                    const SizedBox(height: 20),
+                    UpcomingDays(forecast: _forecast),
+                    const SizedBox(height: 20),
+                    BottomSection(weather: _weather),
                   ],
                 ),
-                SafeArea(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TopSection(
-                            favoriteLocations: app.favourites,
-                            currentLocation: _currentLocation,
-                            searchLocation: _searchLocation,
-                            onSearchPressed: () async =>
-                                await searchIconPressed(),
-                            onSearchSubmit: (value) {
-                              setState(() => _cityInput = _searchLocation.text);
-                              _getWeather();
-                              _dailyForecast();
-                              _airQuality();
-                              _searchLocation.clear();
-                            },
-                            onFavouriteChanged: (value) {
-                              if (value) {
-                                app.removeFavourite(_currentLocation);
-                              } else {
-                                app.addFavourite = _currentLocation;
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          WeatherInfo(
-                              weather: _weather, airQuality: _airQualityIndex),
-                          const SizedBox(height: 20),
-                          OutfitSuggestion(
-                            temperature: _weather?.temperature ?? 20.5,
-                            weatherCondition:
-                                _weather?.weatherCondition ?? "clear",
-                          ),
-                          const SizedBox(height: 20),
-                          UpcomingDays(forecast: _forecast),
-                          const SizedBox(height: 20),
-                          BottomSection(weather: _weather),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+          ),
+        ],
+      ),
     );
   }
 }
