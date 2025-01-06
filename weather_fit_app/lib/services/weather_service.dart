@@ -134,22 +134,54 @@ class WeatherService {
       rethrow;
     }
   }
+}
 
-  Future<List<String>> getCitySuggestions(String query) async {
-    if (query.isEmpty) return [];
-    final url = Uri.parse(
-        'http://api.openweathermap.org/geo/1.0/direct?q=$query&limit=5&appid=$apikey');
+/*
+  Future<String> getCountryCode() async {
     try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((city) => city['name'] as String).toList();
-      } else {
-        throw Exception('Failed to fetch city suggestions');
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
       }
+
+      const LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 100,
+      );
+
+      Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+
+      List<Placemark> placemarks =
+      await placemarkFromCoordinates(position.latitude, position.longitude);
+      print(placemarks[0]);
+      String? countryCode = placemarks[0].isoCountryCode;
+      return countryCode ?? "";
     } catch (e) {
-      log('Error fetching city suggestions: $e');
-      return [];
+      // If there's any error (including null values), return empty string
+      return "";
     }
   }
-}
+
+  Future<String> getPostalCode() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      const LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 100,
+      );
+
+      Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+
+      List<Placemark> placemarks =
+      await placemarkFromCoordinates(position.latitude, position.longitude);
+      String? postalCode = placemarks[0].postalCode;
+      return postalCode ?? "";
+    } catch (e) {
+      // If there's any error (including null values), return empty string
+      return "";
+    }
+  } */

@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weather_fit_app/bloc/app_state.dart';
@@ -7,6 +8,8 @@ import 'package:weather_fit_app/models/weather_model.dart';
 import 'package:weather_fit_app/models/weather_forecast.dart';
 import 'package:weather_fit_app/services/weather_service.dart';
 import 'package:weather_fit_app/screens/favorite_locations_page.dart';
+
+// Import your widgets
 import 'top_section.dart';
 import 'weather_info.dart';
 import 'outfit_suggestion.dart';
@@ -18,7 +21,7 @@ class WeatherHomePage extends ConsumerStatefulWidget {
   const WeatherHomePage({Key? key, this.city, this.service}) : super(key: key);
 
   final String? city;
-  final WeatherService? service;
+  final WeatherService? service; // Accept service via constructor
 
   @override
   ConsumerState<WeatherHomePage> createState() => _WeatherHomePageState();
@@ -34,10 +37,6 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   String _currentLocation = "";
   Map<String, double>? location;
 
-  List<String>? favouriteLocation = [];
-  List<String> _citySuggestions = []; // City suggestions for dropdown
-  bool _isLoadingSuggestions = false; // Suggestion loading indicator
-
   @override
   void initState() {
     super.initState();
@@ -46,6 +45,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     if (widget.city != null) searchIconPressed(initial: widget.city);
   }
 
+  List<String>? favouriteLocation = [];
   void _loadSavedFavoriteLocation() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
@@ -114,19 +114,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _cityInput = initial ?? _searchLocation.text.trim();
     _currentLocation = _cityInput;
     _searchLocation.clear();
-
-    // Clear the suggestions list
-    setState(() {
-      _citySuggestions = [];
-    });
-
     await initialize();
-  }
-
-  Future<void> fetchSuggestions(String query) async {
-    setState(() => _isLoadingSuggestions = true);
-    _citySuggestions = await _weatherService.getCitySuggestions(query);
-    setState(() => _isLoadingSuggestions = false);
   }
 
   String _getBackgroundImage(String? condition) {
@@ -185,6 +173,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
       )
           : Stack(
         children: [
+          // Background image with overlay
           Stack(
             children: [
               Image.asset(
@@ -212,11 +201,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                       onSearchPressed: () async =>
                       await searchIconPressed(),
                       onSearchSubmit: (value) {
-                        setState(() {
-                          _cityInput = _searchLocation.text;
-                          _citySuggestions =
-                          []; // Clear the suggestions list
-                        });
+                        setState(() => _cityInput = _searchLocation.text);
                         _getWeather();
                         _dailyForecast();
                         _airQuality();
@@ -229,9 +214,6 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                           app.addFavourite = _currentLocation;
                         }
                       },
-                      onInputChanged: fetchSuggestions,
-                      citySuggestions: _citySuggestions,
-                      isLoadingSuggestions: _isLoadingSuggestions,
                     ),
                     const SizedBox(height: 20),
                     WeatherInfo(
