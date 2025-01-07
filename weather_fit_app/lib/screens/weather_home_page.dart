@@ -95,7 +95,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
       // Handle the case where the location does not exist
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Location does not exist. Please try again."),
+          content: Text("City does not exist. Please try another city."),
           duration: Duration(seconds: 3),
         ),
       );
