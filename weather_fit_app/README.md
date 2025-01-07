@@ -4,13 +4,8 @@ A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Create a .env file in the root folder "weather_fit_app"
 
-A few resources to get you started if this is your first Flutter project:
+Insert the following information into the .env file: WEATHER_API_KEY="3df683afc2a8c5ffaad3c79a3cebe230"
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Ready to run!
