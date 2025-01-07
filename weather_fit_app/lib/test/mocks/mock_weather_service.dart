@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:weather_fit_app/services/weather_service.dart';
 import 'package:weather_fit_app/models/weather_model.dart';
 import 'package:weather_fit_app/models/weather_forecast.dart';
@@ -45,16 +48,20 @@ class MockWeatherService extends WeatherService {
   @override
   Future<Map<String, double>> getCoordinates([dynamic params]) async {
     if (params == 'invalid') {
+      debugPrint('Mock getCoordinates called');
       return _mockCoordinates['invalid']!;
     }
+    debugPrint('Mock getCoordinates called');
     return _mockCoordinates['valid']!;
   }
 
   @override
   Future<WeatherModel> getWeather(Map<String, double> coordinate, String cityName) async {
     if (coordinate['lat'] == 0.0 && coordinate['lon'] == 0.0) {
+      debugPrint('Mock getWeather called for city: $cityName');
       throw Exception('Invalid coordinates');
     }
+    debugPrint('Mock getWeather called for city: $cityName');
     return _mockWeatherData['valid']!;
   }
 
@@ -72,6 +79,17 @@ class MockWeatherService extends WeatherService {
       throw Exception('Invalid air quality request');
     }
     return AirQuality(airQualityIndex: 2.0); // Mocked data
+  }
+
+  @override
+  Future<void> getLocationPermission({
+    Future Function(Map<String, double>)? onLocationPermitted,
+    VoidCallback? onLocationRejected,
+  }) async {
+    const mockLocation = {"lat": 40.7128, "lon": -74.0060};
+    if (onLocationPermitted != null) {
+      await onLocationPermitted(mockLocation);
+    }
   }
 
 }

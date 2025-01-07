@@ -15,31 +15,41 @@ class WeatherService {
 
   WeatherService(this.apikey);
 
-  Future<WeatherModel> getWeather(
-      Map<String, double> coordinate, String cityName) async {
-    String val = '';
-    double? lat = coordinate["lat"];
-    double? lon = coordinate["lon"];
-    var url;
-    if (cityName.isEmpty) {
-      url = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
-    } else {
-      url = '$BASEURL?q=$cityName&appid=$apikey&units=metric';
+  Future<WeatherModel> getWeather(Map<String, double> coordinate, String cityName) async {
+    cityName = cityName.trim();
+    final lat = coordinate["lat"];
+    final lon = coordinate["lon"];
+
+    // Ensure lat/lon exist if `cityName` is empty
+    if (cityName.isEmpty && (lat == null || lon == null)) {
+      throw Exception('Latitude and longitude must be provided if city name is not specified.');
     }
 
+    // Construct URL
+    final url = cityName.isNotEmpty
+        ? '$BASEURL?q=$cityName&appid=$apikey&units=metric'
+        : '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
+
+    // Fetch data
     final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['main'] != null && data['weather'] != null) {
-        return WeatherModel.fromJson(data);
-      } else {
-        throw Exception('Invalid weather data structure');
-      }
+    // Handle HTTP status codes
+    if (response.statusCode == 404) {
+      throw CityNotFoundException('City "$cityName" not found.');
+    }
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load weather data: ${response.reasonPhrase} (${response.statusCode})');
+    }
+
+    // Parse and validate JSON response
+    final data = jsonDecode(response.body);
+    if (data['main'] != null && data['weather'] != null) {
+      return WeatherModel.fromJson(data);
     } else {
-      throw Exception('Failed to load weather data: ${response.reasonPhrase}');
+      throw Exception('Invalid weather data structure received from API.');
     }
   }
+
 
   Future<void> getLocationPermission(
       {Future Function(Map<String, double>)? onLocationPermitted,
@@ -134,7 +144,14 @@ class WeatherService {
       rethrow;
     }
   }
+
 }
+
+class CityNotFoundException implements Exception {
+  final String message;
+  CityNotFoundException(this.message);
+}
+
 
 /*
   Future<String> getCountryCode() async {
