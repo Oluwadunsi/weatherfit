@@ -35,6 +35,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
   AirQuality? _airQualityIndex;
   String _cityInput = "";
   String _currentLocation = "";
+  String _lastValidLocation = ""; // Track the last valid location
+  WeatherModel? _lastValidWeather; // Track the last valid weather data
   Map<String, double>? location;
 
   @override
@@ -72,17 +74,40 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
 
   Future<void> _getWeather() async {
     if (location == null) return;
-    final Map<String, double> coordinates =
-        await _weatherService.getCoordinates(_cityInput) ?? location!;
+    try {
+      final Map<String, double> coordinates =
+          await _weatherService.getCoordinates(_cityInput) ?? location!;
 
-    final currentWeather = await _weatherService.getWeather(
-      coordinates,
-      _cityInput,
-    );
-    setState(() {
-      _weather = currentWeather;
-      _currentLocation = _weather?.location ?? 'n/a';
-    });
+      final currentWeather = await _weatherService.getWeather(
+        coordinates,
+        _cityInput,
+      );
+
+      setState(() {
+        _weather = currentWeather;
+        _currentLocation = _weather?.location ?? 'n/a';
+
+        // Save the current valid location and weather data
+        _lastValidLocation = _currentLocation;
+        _lastValidWeather = _weather;
+      });
+    } on CityNotFoundException catch (e) {
+      _showErrorDialog(context, e.message);
+
+      // Revert to the last valid location and weather data
+      setState(() {
+        _currentLocation = _lastValidLocation;
+        _weather = _lastValidWeather;
+      });
+    } catch (e) {
+      _showErrorDialog(context, 'Location not found. Please try again.');
+
+      // Revert to the last valid location and weather data
+      setState(() {
+        _currentLocation = _lastValidLocation;
+        _weather = _lastValidWeather;
+      });
+    }
   }
 
   Future<void> _dailyForecast() async {
@@ -115,6 +140,26 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _currentLocation = _cityInput;
     _searchLocation.clear();
     await initialize();
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String _getBackgroundImage(String? condition) {
@@ -217,7 +262,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
                     ),
                     const SizedBox(height: 20),
                     WeatherInfo(
-                        weather: _weather, airQuality: _airQualityIndex),
+                        weather: _weather,
+                        airQuality: _airQualityIndex),
                     const SizedBox(height: 20),
                     OutfitSuggestion(
                       temperature: _weather?.temperature ?? 20.5,
