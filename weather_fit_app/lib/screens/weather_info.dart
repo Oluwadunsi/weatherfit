@@ -32,19 +32,24 @@ class WeatherInfo extends StatelessWidget {
           Column(
            // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                weather?.location ?? "",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
+              const SizedBox(width: 55),
+
+                  Text(
+                      weather?.location ?? "",
+
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4), // Reduced spacing
               Text(
                 weather?.weatherCondition ?? "",
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: Colors.black87,
                 ),
@@ -53,7 +58,7 @@ class WeatherInfo extends StatelessWidget {
               Text(
                   "${weather?.temperature.round() ?? ''}°",
                 style: const TextStyle(
-                  fontSize: 64,
+                  fontSize: 60,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),

@@ -53,7 +53,7 @@ class FavoriteLocationsPage extends ConsumerWidget {
                 title: Text(
                   location,
                   style: const TextStyle(
-                    fontSize: 17,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
