@@ -15,12 +15,13 @@ class WeatherService {
 
   WeatherService(this.apikey);
 
-  Future<WeatherModel> getWeather(
+  Future<WeatherModel?> getWeather(
       Map<String, double> coordinate, String cityName) async {
     String val = '';
     double? lat = coordinate["lat"];
     double? lon = coordinate["lon"];
     var url;
+
     if (cityName.isEmpty) {
       url = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
     } else {
@@ -34,10 +35,10 @@ class WeatherService {
       if (data['main'] != null && data['weather'] != null) {
         return WeatherModel.fromJson(data);
       } else {
-        throw Exception('Invalid weather data structure');
+        return null; // Invalid city or structure
       }
     } else {
-      throw Exception('Failed to load weather data: ${response.reasonPhrase}');
+      return null; // Failed response
     }
   }
 

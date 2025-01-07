@@ -32,7 +32,9 @@ class _TopSectionState extends State<TopSection> {
         IconButton(
           icon: Icon(
             isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: isFavorited ? Colors.red : null,
+            color: isFavorited
+                ? const Color(0xFFB20000) // Custom red color
+                : const Color(0xD6D6D6FF), // Custom grey color
           ),
           onPressed: () => widget.onFavouriteChanged(isFavorited),
         ),

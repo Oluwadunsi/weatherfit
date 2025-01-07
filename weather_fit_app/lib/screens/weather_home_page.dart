@@ -114,8 +114,27 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _cityInput = initial ?? _searchLocation.text.trim();
     _currentLocation = _cityInput;
     _searchLocation.clear();
-    await initialize();
+
+    try {
+      await initialize();
+      if (_weather == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Invalid city name, please try again."),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Something went wrong, please try again."),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
+
 
   String _getBackgroundImage(String? condition) {
     switch (condition?.toLowerCase()) {
