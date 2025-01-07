@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weather_fit_app/bloc/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,6 @@ import 'package:weather_fit_app/screens/favorite_locations_page.dart';
 import 'top_section.dart';
 import 'weather_info.dart';
 import 'outfit_suggestion.dart';
-import 'hourly_forecast.dart';
 import 'upcoming_days.dart';
 import 'bottom_section.dart';
 
@@ -28,7 +28,7 @@ class WeatherHomePage extends ConsumerStatefulWidget {
 }
 
 class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
-  final _weatherService = WeatherService('3df683afc2a8c5ffaad3c79a3cebe230');
+  final _weatherService = WeatherService('${dotenv.env['WEATHER_API_KEY']}');
   final TextEditingController _searchLocation = TextEditingController();
   WeatherModel? _weather;
   WeatherForecast? _forecast;
@@ -114,27 +114,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _cityInput = initial ?? _searchLocation.text.trim();
     _currentLocation = _cityInput;
     _searchLocation.clear();
-
-    try {
-      await initialize();
-      if (_weather == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Invalid city name, please try again."),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Something went wrong, please try again."),
-          duration: Duration(seconds: 3),
-        ),
-      );
-    }
+    await initialize();
   }
-
 
   String _getBackgroundImage(String? condition) {
     switch (condition?.toLowerCase()) {
@@ -163,7 +144,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
       appBar: AppBar(
         title: const Text(
           "Weather Styles",
-          style: TextStyle(fontSize: 23, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 17),
         ),
         centerTitle: true,
         backgroundColor: Colors.blue,

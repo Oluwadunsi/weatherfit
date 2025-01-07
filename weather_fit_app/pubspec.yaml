@@ -45,11 +45,13 @@ dependencies:
   sizer: any
   async_preferences: ^1.0.1
   shared_preferences: ^2.3.3
-
+  flutter_dotenv:
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
+    sdk: flutter
+  flutter_driver:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -73,6 +75,7 @@ flutter:
     - assets/cloudy.jpg
     - assets/clear.jpg
     - assets/
+    - .env
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
