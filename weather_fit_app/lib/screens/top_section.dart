@@ -26,7 +26,7 @@ class _TopSectionState extends State<TopSection> {
   @override
   Widget build(BuildContext context) {
     final isFavorited =
-        widget.favoriteLocations.contains(widget.currentLocation);
+    widget.favoriteLocations.contains(widget.currentLocation);
     return Row(
       children: [
         IconButton(
@@ -40,16 +40,30 @@ class _TopSectionState extends State<TopSection> {
           child: TextField(
             controller: widget.searchLocation,
             decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: 2),
-                prefixIcon: IconButton(
-                  onPressed: widget.onSearchPressed,
-                  icon: const Icon(Icons.search),
-                ),
-                hintText: "search city",
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.black)),
-                constraints: BoxConstraints.tightFor(height: 40)),
+              contentPadding: EdgeInsets.only(left: 2),
+              prefixIcon: IconButton(
+                onPressed: widget.onSearchPressed,
+                icon: const Icon(Icons.search),
+              ),
+              hintText: "Search Your City",
+              hintStyle: const TextStyle(
+                color: Colors.white60, // Hint text color
+                fontSize: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.black), // Default border
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.white60), // Static border color
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blue, width: 2), // Border when focused
+              ),
+              constraints: const BoxConstraints.tightFor(height: 40),
+            ),
             onSubmitted: widget.onSearchSubmit,
           ),
         ),

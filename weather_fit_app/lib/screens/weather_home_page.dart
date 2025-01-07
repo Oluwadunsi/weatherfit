@@ -144,7 +144,7 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
       appBar: AppBar(
         title: const Text(
           "Weather Styles",
-          style: TextStyle(fontSize: 17),
+          style: TextStyle(fontSize: 23, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
         backgroundColor: Colors.blue,

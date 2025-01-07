@@ -5,16 +5,20 @@ import 'package:weather_fit_app/screens/weather_home_page.dart';
 import '../bloc/app_state.dart';
 
 class FavoriteLocationsPage extends ConsumerWidget {
-
-  const FavoriteLocationsPage(
-      {super.key});
+  const FavoriteLocationsPage({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var app = ref.watch(appState);
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Favourite Locations"),
+        title: const Text(
+          "Favourite Locations",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         backgroundColor: Colors.blue,
       ),
       body: Container(
@@ -54,7 +58,7 @@ class FavoriteLocationsPage extends ConsumerWidget {
                   ),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete, color: Colors.blueGrey),
                   onPressed: () {
                     app.removeFavourite(location);
                   },
