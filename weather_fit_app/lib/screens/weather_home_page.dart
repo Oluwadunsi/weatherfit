@@ -46,12 +46,13 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     if (widget.city != null) searchIconPressed(initial: widget.city);
   }
 
-  void _loadSavedFavoriteLocation() async {
+  Future<void> _loadSavedFavoriteLocation() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
-      favouriteLocation = preferences.getStringList("favourite");
+      favouriteLocation = preferences.getStringList("favourite") ?? [];
     });
   }
+
 
   Future<void> initialize() async {
     await _weatherService.getLocationPermission(
@@ -60,6 +61,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
           location = loc;
         });
 
+        // Load favorites and update state after permission is granted
+        await _loadSavedFavoriteLocation();
         await _getWeather();
         await _dailyForecast();
         await _airQuality();
@@ -70,20 +73,35 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     );
   }
 
+
   Future<void> _getWeather() async {
     if (location == null) return;
-    final Map<String, double> coordinates =
-        await _weatherService.getCoordinates(_cityInput) ?? location!;
 
-    final currentWeather = await _weatherService.getWeather(
-      coordinates,
-      _cityInput,
-    );
-    setState(() {
-      _weather = currentWeather;
-      _currentLocation = _weather?.location ?? 'n/a';
-    });
+    try {
+      final Map<String, double> coordinates =
+          await _weatherService.getCoordinates(_cityInput) ?? location!;
+
+      final currentWeather = await _weatherService.getWeather(
+        coordinates,
+        _cityInput,
+      );
+
+      // Update the state only if the weather data is successfully fetched
+      setState(() {
+        _weather = currentWeather;
+        _currentLocation = _weather?.location ?? 'n/a';
+      });
+    } catch (e) {
+      // Handle the case where the location does not exist
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Location does not exist. Please try again."),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
   }
+
 
   Future<void> _dailyForecast() async {
     if (location == null) return;
@@ -114,8 +132,15 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _cityInput = initial ?? _searchLocation.text.trim();
     _currentLocation = _cityInput;
     _searchLocation.clear();
-    await initialize();
+
+    try {
+      await initialize();
+      await _getWeather(); // Ensure this is called to handle invalid city names
+    } catch (e) {
+      // Already handled in `_getWeather`
+    }
   }
+
 
   String _getBackgroundImage(String? condition) {
     switch (condition?.toLowerCase()) {

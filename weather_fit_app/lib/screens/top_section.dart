@@ -36,33 +36,36 @@ class _TopSectionState extends State<TopSection> {
                 ? const Color(0xFFB20000) // Custom red color
                 : const Color(0xD6D6D6FF), // Custom grey color
           ),
-          onPressed: () => widget.onFavouriteChanged(isFavorited),
+          onPressed: () {
+            widget.onFavouriteChanged(isFavorited);
+            setState(() {}); // Force rebuild after favorite toggle
+          },
         ),
         Expanded(
           child: TextField(
             controller: widget.searchLocation,
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.only(left: 2),
+              contentPadding: const EdgeInsets.only(left: 2),
               prefixIcon: IconButton(
                 onPressed: widget.onSearchPressed,
                 icon: const Icon(Icons.search),
               ),
               hintText: "Search Your City",
               hintStyle: const TextStyle(
-                color: Colors.white60, // Hint text color
+                color: Colors.white60,
                 fontSize: 14,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.black), // Default border
+                borderSide: const BorderSide(color: Colors.black),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.white60), // Static border color
+                borderSide: const BorderSide(color: Colors.white60),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.blue, width: 2), // Border when focused
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
               constraints: const BoxConstraints.tightFor(height: 40),
             ),
@@ -72,4 +75,5 @@ class _TopSectionState extends State<TopSection> {
       ],
     );
   }
+
 }
