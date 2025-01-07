@@ -20,7 +20,7 @@ class MockWeatherServiceIntegration extends MockWeatherService  {
       humidity: '50',
       feelsLikeTemperature: 27.0,
       speed: 10.0,
-      pressure: 1015,
+      pressure: 1015, visibility: 1,
     ),
   };
 

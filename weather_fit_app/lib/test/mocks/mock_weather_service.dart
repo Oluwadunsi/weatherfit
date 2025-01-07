@@ -22,6 +22,7 @@ class MockWeatherService extends WeatherService {
       feelsLikeTemperature: 24.5,
       speed: 5.0,
       pressure: 1013,
+      visibility: 1000
     ),
   };
 

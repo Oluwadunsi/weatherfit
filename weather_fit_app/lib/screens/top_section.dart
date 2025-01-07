@@ -19,74 +19,61 @@ class TopSection extends StatefulWidget {
   });
 
   @override
-  _TopSectionState createState() => _TopSectionState();
+  State<TopSection> createState() => _TopSectionState();
 }
 
 class _TopSectionState extends State<TopSection> {
-  late FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode(); // Initialize FocusNode
-    widget.searchLocation.addListener(_handleTextFieldFocus);
-  }
-
-  @override
-  void dispose() {
-    focusNode.dispose(); // Dispose of the FocusNode
-    widget.searchLocation.removeListener(_handleTextFieldFocus);
-    super.dispose();
-  }
-
-  void _handleTextFieldFocus() {
-    if (!focusNode.hasFocus && widget.searchLocation.text.isNotEmpty) {
-      focusNode.requestFocus(); // Ensure focus remains consistent
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isFavorited = widget.favoriteLocations.contains(widget.currentLocation);
-
+    final isFavorited =
+    widget.favoriteLocations.contains(widget.currentLocation);
     return Row(
       children: [
         IconButton(
           icon: Icon(
             isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: isFavorited ? Colors.red : null,
+            color: isFavorited
+                ? const Color(0xFFB20000) // Custom red color
+                : const Color(0xD6D6D6FF), // Custom grey color
           ),
-          onPressed: () => widget.onFavouriteChanged(isFavorited),
+          onPressed: () {
+            widget.onFavouriteChanged(isFavorited);
+            setState(() {}); // Force rebuild after favorite toggle
+          },
         ),
         Expanded(
           child: TextField(
             controller: widget.searchLocation,
-            focusNode: focusNode, // Attach FocusNode
             decoration: InputDecoration(
+              contentPadding: const EdgeInsets.only(left: 2),
               prefixIcon: IconButton(
-                onPressed: () {
-                  focusNode.requestFocus(); // Ensure the TextField has focus
-                  widget.onSearchPressed();
-                },
+                onPressed: widget.onSearchPressed,
                 icon: const Icon(Icons.search),
               ),
-              hintText: "Search city",
+              hintText: "Search Your City",
+              hintStyle: const TextStyle(
+                color: Colors.white60,
+                fontSize: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.black),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.white60),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
+              ),
               constraints: const BoxConstraints.tightFor(height: 40),
             ),
-            onTap: () {
-              focusNode.requestFocus(); // Request focus on tap
-            },
-            onSubmitted: (value) {
-              focusNode.unfocus(); // Remove focus after submission
-              widget.onSearchSubmit(value);
-            },
+            onSubmitted: widget.onSearchSubmit,
           ),
         ),
       ],
     );
   }
+
 }

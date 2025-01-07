@@ -15,58 +15,47 @@ class WeatherService {
 
   WeatherService(this.apikey);
 
-  Future<WeatherModel> getWeather(Map<String, double> coordinate, String cityName) async {
-    cityName = cityName.trim();
-    final lat = coordinate["lat"];
-    final lon = coordinate["lon"];
-
-    // Ensure lat/lon exist if `cityName` is empty
-    if (cityName.isEmpty && (lat == null || lon == null)) {
-      throw Exception('Latitude and longitude must be provided if city name is not specified.');
+  Future<WeatherModel> getWeather(
+      Map<String, double> coordinate, String cityName) async {
+    double? lat = coordinate["lat"];
+    double? lon = coordinate["lon"];
+    var url;
+    if (cityName.isEmpty) {
+      url = '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
+    } else {
+      url = '$BASEURL?q=$cityName&appid=$apikey&units=metric';
     }
 
-    // Construct URL
-    final url = cityName.isNotEmpty
-        ? '$BASEURL?q=$cityName&appid=$apikey&units=metric'
-        : '$BASEURL?lat=$lat&lon=$lon&appid=$apikey&units=metric';
-
-    // Fetch data
     final response = await http.get(Uri.parse(url));
 
-    // Handle HTTP status codes
-    if (response.statusCode == 404) {
-      throw CityNotFoundException('City "$cityName" not found.');
-    }
-    if (response.statusCode != 200) {
-      throw Exception('Failed to load weather data: ${response.reasonPhrase} (${response.statusCode})');
-    }
-
-    // Parse and validate JSON response
-    final data = jsonDecode(response.body);
-    if (data['main'] != null && data['weather'] != null) {
-      return WeatherModel.fromJson(data);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['main'] != null && data['weather'] != null) {
+        return WeatherModel.fromJson(data);
+      } else {
+        throw Exception('Invalid weather data structure');
+      }
     } else {
-      throw Exception('Invalid weather data structure received from API.');
+      throw Exception('Failed to load weather data: ${response.reasonPhrase}');
     }
   }
 
-
   Future<void> getLocationPermission(
       {Future Function(Map<String, double>)? onLocationPermitted,
-        VoidCallback? onLocationRejected}) async {
+      VoidCallback? onLocationRejected}) async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
 
     if ((permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) &&
+            permission == LocationPermission.deniedForever) &&
         onLocationRejected != null) {
       onLocationRejected();
       return;
     }
     if ((permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) &&
+            permission == LocationPermission.whileInUse) &&
         onLocationPermitted != null) {
       const LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.best,
@@ -144,61 +133,4 @@ class WeatherService {
       rethrow;
     }
   }
-
 }
-
-class CityNotFoundException implements Exception {
-  final String message;
-  CityNotFoundException(this.message);
-}
-
-
-/*
-  Future<String> getCountryCode() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 100,
-      );
-
-      Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-
-      List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
-      print(placemarks[0]);
-      String? countryCode = placemarks[0].isoCountryCode;
-      return countryCode ?? "";
-    } catch (e) {
-      // If there's any error (including null values), return empty string
-      return "";
-    }
-  }
-
-  Future<String> getPostalCode() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 100,
-      );
-
-      Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-
-      List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
-      String? postalCode = placemarks[0].postalCode;
-      return postalCode ?? "";
-    } catch (e) {
-      // If there's any error (including null values), return empty string
-      return "";
-    }
-  } */

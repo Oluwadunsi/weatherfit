@@ -72,8 +72,9 @@ class UpcomingDays extends StatelessWidget {
                     if (weatherIcon != null)
                       Image.network(
                         'http://openweathermap.org/img/w/$weatherIcon.png',
-                        width: 40,
-                        height: 20,
+                        width: 50,
+                        height: 25,
+                        fit: BoxFit.fitWidth,
                       )
                     else
                       const Icon(Icons.error, size: 20, color: Colors.red),

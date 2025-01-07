@@ -11,53 +11,53 @@ class OutfitSuggestion extends StatelessWidget {
   final Map<String, Map<String, List<Map<String, String>>>> outfitSuggestions = {
     "cold": {
       "rain": [
-        {"suggestion": "Wear a raincoat and scarf.", "avatar": "../../assets/rainy_cold_avatar.jpeg"},
-        {"suggestion": "Carry an umbrella and wear warm waterproof boots.", "avatar": "../../assets/rainy_cold_avatar.jpeg"},
+        {"suggestion": "Carry an umbrella and wear warm waterproof boots.", "avatar": "assets/rainy_cold_avatar.jpeg"},
+        {"suggestion": "Wear a raincoat and scarf.", "avatar": "assets/rainy_cold_avatar.jpeg"},
       ],
       "snow": [
-        {"suggestion": "Wear insulated gloves and snow boots.", "avatar": "../../assets/snowy_cold_avatar.jpeg"},
+        {"suggestion": "Wear insulated gloves and snow boots.", "avatar": "assets/snowy_cold_avatar.jpeg"},
       ],
       "clouds": [
-        {"suggestion": "Wear a heavy jacket and scarf.", "avatar": "../../assets/cloudy_cold_avatar.jpeg"},
+        {"suggestion": "Wear a heavy jacket and scarf.", "avatar": "assets/cloudy_cold_avatar.jpeg"},
       ],
       "general": [
-        {"suggestion": "Wear a warm coat and gloves.", "avatar": "../../assets/cold_general_avatar.jpeg"},
+        {"suggestion": "Wear a warm coat and gloves.", "avatar": "assets/cold_general_avatar.jpeg"},
       ],
     },
     "cool": {
       "clear": [
-        {"suggestion": "Wear a light sweater or hoodie.", "avatar": "../../assets/clear_cool_avatar.jpeg"},
+        {"suggestion": "Wear a light sweater or hoodie.", "avatar": "assets/clear_cool_avatar.jpeg"},
       ],
       "clouds": [
-        {"suggestion": "Layer up with a jacket.", "avatar": "../../assets/cloudy_cold_avatar.jpeg"},
+        {"suggestion": "Layer up with a jacket.", "avatar": "assets/cloudy_cold_avatar.jpeg"},
       ],
       "rain": [
-        {"suggestion": "Carry an umbrella and wear waterproof shoes.", "avatar": "../../assets/rainy_cold_avatar.jpeg"},
+        {"suggestion": "Carry an umbrella and wear waterproof shoes.", "avatar": "assets/rainy_cold_avatar.jpeg"},
       ],
       "general": [
-        {"suggestion": "Layer up with a light jacket.", "avatar": "../../assets/clear_cool_avatar.jpeg"},
+        {"suggestion": "Layer up with a light jacket.", "avatar": "assets/clear_cool_avatar.jpeg"},
       ],
     },
     "warm": {
       "clear": [
-        {"suggestion": "Wear a T-shirt, shorts, and sunglasses.", "avatar": "../../assets/sunny_warm_avatar.jpeg"},
+        {"suggestion": "Wear a T-shirt, shorts, and sunglasses.", "avatar": "assets/sunny_warm_avatar.jpeg"},
       ],
       "rain": [
-        {"suggestion": "Wear a light raincoat.", "avatar": "../../assets/rainy_warm_avatar.jpeg"},
+        {"suggestion": "Wear a light raincoat.", "avatar": "assets/rainy_warm_avatar.jpeg"},
       ],
       "general": [
-        {"suggestion": "Light clothing is recommended.", "avatar": "../../assets/warm_general_avatar.jpeg"},
+        {"suggestion": "Light clothing is recommended.", "avatar": "assets/warm_general_avatar.jpeg"},
       ],
     },
     "hot": {
       "clear": [
-        {"suggestion": "Light cotton clothing and sunscreen recommended.", "avatar": "../../assets/sunny_hot_avatar.jpeg"},
+        {"suggestion": "Light cotton clothing and sunscreen recommended.", "avatar": "assets/sunny_hot_avatar.jpeg"},
       ],
       "rain": [
-        {"suggestion": "Light waterproof gear to stay cool.", "avatar": "../../assets/rainy_hot_avatar.jpeg"},
+        {"suggestion": "Light waterproof gear to stay cool.", "avatar": "assets/rainy_hot_avatar.jpeg"},
       ],
       "general": [
-        {"suggestion": "Stay hydrated and wear breathable clothing.", "avatar": "../../assets/hot_general_avatar.jpeg"},
+        {"suggestion": "Stay hydrated and wear breathable clothing.", "avatar": "assets/hot_general_avatar.jpeg"},
       ],
     },
   };

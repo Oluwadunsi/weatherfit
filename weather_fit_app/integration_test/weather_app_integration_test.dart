@@ -54,35 +54,70 @@ void main() {
       await tester.tap(searchIcon);
       await tester.pumpAndSettle();
 
-      // Verify the error message is displayed
-      expect(find.text('Invalid City'), findsOneWidget);
-      expect(find.text('City not found'), findsOneWidget); // Assuming the app shows this message
+      // Verify the Snackbar message is displayed
+      expect(find.text('Location does not exist. Please try again.'), findsOneWidget);
+
+      // Verify the latest location weather data is still displayed
+      expect(find.text('New York'), findsOneWidget); // Replace 'New York' with your latest location if different
+      expect(find.text('Clouds'), findsOneWidget);  // Replace 'Clouds' with your actual condition if different
     });
 
-    //   testWidgets('Navigate from favorite locations and display data for selected location', (tester) async {
-  //     await tester.pumpAndSettle();
-  //
-  //     // Navigate to favorite locations
-  //     final favoriteIcon = find.byIcon(Icons.favorite_border).first;
-  //     await tester.tap(favoriteIcon);
-  //     await tester.pumpAndSettle();
-  //
-  //     // Assuming 'Favorites' is a button on the current page after tapping favorite icon
-  //     final favoritesButton = find.text('Favorites').first;
-  //     await tester.tap(favoritesButton);
-  //     await tester.pumpAndSettle();
-  //
-  //     // Assuming 'Test City' is a text widget in the list of favorite locations
-  //     final favoriteLocation = find.text('Test City').first;
-  //     expect(favoriteLocation, findsOneWidget, reason: 'Favorite location should be displayed.');
-  //
-  //     // Tap on the favorite location and check if it navigates correctly
-  //     await tester.tap(favoriteLocation);
-  //     await tester.pumpAndSettle();
-  //
-  //     expect(find.text('Test City'), findsOneWidget, reason: 'Selected location data should be displayed on the home page.');
-  //     expect(find.text('Clear'), findsOneWidget, reason: 'Selected location weather condition should be displayed.');
-  //   });
+    testWidgets('Add and remove favorite locations', (tester) async {
+      app.main(service: mockService); // Pass the mocked service
+      await tester.pumpAndSettle();
 
+      // Add the current location to favorites
+      final favoriteIcon = find.byIcon(Icons.favorite_border);
+      expect(favoriteIcon, findsOneWidget);
+
+      await tester.tap(favoriteIcon);
+      await tester.pumpAndSettle();
+
+      // Verify the location is now a favorite
+      final favoritedIcon = find.byIcon(Icons.favorite);
+      expect(favoritedIcon, findsOneWidget);
+
+      // Open the Favorite Locations page
+      final drawerButton = find.byTooltip('Open navigation menu');
+      await tester.tap(drawerButton);
+      await tester.pumpAndSettle();
+
+      final favoritesPageTitle = find.text('Favourite Locations');
+      expect(favoritesPageTitle, findsOneWidget);
+
+      // Verify the favorite location is listed
+      final favoriteLocation = find.text('New York');
+      expect(favoriteLocation, findsOneWidget);
+
+      // Remove the location from favorites
+      final deleteButton = find.byIcon(Icons.delete).first;
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+
+      // Ensure the location is removed
+      expect(find.text('New York'), findsNothing);
+    });
+
+    testWidgets('Navigate to a favorite location', (tester) async {
+      app.main(service: mockService); // Pass the mocked service
+      await tester.pumpAndSettle();
+
+      // Open the Favorite Locations page
+      final drawerButton = find.byTooltip('Open navigation menu');
+      await tester.tap(drawerButton);
+      await tester.pumpAndSettle();
+
+      final favoritesPageTitle = find.text('Favourite Locations');
+      expect(favoritesPageTitle, findsOneWidget);
+
+      // Tap on a favorite location
+      final favoriteLocation = find.text('New York');
+      await tester.tap(favoriteLocation);
+      await tester.pumpAndSettle();
+
+      // Verify navigation to the WeatherHomePage with the selected location
+      final locationTitle = find.text('New York');
+      expect(locationTitle, findsOneWidget);
+    });
   });
 }

@@ -8,15 +8,13 @@ class BottomSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  // wind pressure is calculated using: P = 0.00256 * V^2
-  double value = 0.00256;
-  double speed = weather?.speed ?? 0.0 * 3.6; // wind speed from meter per second to kilometer per hour
+    int visibility = weather?.visibility ?? 0;
 
   final dataItems = [
-      {"title": "Wind Speed", "value": "${weather?.speed} km/h"}, // Mock data
+      {"title": "Wind Speed", "value": "${weather?.speed} km/h"},
       {"title": "Humidity", "value": "${weather?.humidity ?? '0'}%"},
-      {"title": "Pressure", "value": "${weather?.pressure ?? 0} hPa"}, // Mock data
-      {"title": "Feels Like", "value": "${weather?.feelsLikeTemperature.round() ?? 'N/A'}°"},
+      {"title": "Pressure", "value": "${weather?.pressure ?? 0} hPa"},
+      {"title": "Visibility", "value": "${(visibility * 0.0001).round()} km"},
     ];
 
     return Container(
@@ -67,6 +65,7 @@ class BottomSection extends StatelessWidget {
               color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
@@ -75,6 +74,7 @@ class BottomSection extends StatelessWidget {
               fontSize: 14,
               color: Colors.black,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

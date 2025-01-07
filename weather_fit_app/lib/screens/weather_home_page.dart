@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weather_fit_app/bloc/app_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +14,6 @@ import 'package:weather_fit_app/screens/favorite_locations_page.dart';
 import 'top_section.dart';
 import 'weather_info.dart';
 import 'outfit_suggestion.dart';
-import 'hourly_forecast.dart';
 import 'upcoming_days.dart';
 import 'bottom_section.dart';
 
@@ -28,16 +28,15 @@ class WeatherHomePage extends ConsumerStatefulWidget {
 }
 
 class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
-  final _weatherService = WeatherService('3df683afc2a8c5ffaad3c79a3cebe230');
+  final _weatherService = WeatherService('${dotenv.env['WEATHER_API_KEY']}');
   final TextEditingController _searchLocation = TextEditingController();
   WeatherModel? _weather;
   WeatherForecast? _forecast;
   AirQuality? _airQualityIndex;
   String _cityInput = "";
   String _currentLocation = "";
-  String _lastValidLocation = ""; // Track the last valid location
-  WeatherModel? _lastValidWeather; // Track the last valid weather data
   Map<String, double>? location;
+  List<String>? favouriteLocation = [];
 
   @override
   void initState() {
@@ -47,13 +46,13 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     if (widget.city != null) searchIconPressed(initial: widget.city);
   }
 
-  List<String>? favouriteLocation = [];
-  void _loadSavedFavoriteLocation() async {
+  Future<void> _loadSavedFavoriteLocation() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
-      favouriteLocation = preferences.getStringList("favourite");
+      favouriteLocation = preferences.getStringList("favourite") ?? [];
     });
   }
+
 
   Future<void> initialize() async {
     await _weatherService.getLocationPermission(
@@ -62,6 +61,8 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
           location = loc;
         });
 
+        // Load favorites and update state after permission is granted
+        await _loadSavedFavoriteLocation();
         await _getWeather();
         await _dailyForecast();
         await _airQuality();
@@ -72,8 +73,10 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     );
   }
 
+
   Future<void> _getWeather() async {
     if (location == null) return;
+
     try {
       final Map<String, double> coordinates =
           await _weatherService.getCoordinates(_cityInput) ?? location!;
@@ -83,32 +86,22 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
         _cityInput,
       );
 
+      // Update the state only if the weather data is successfully fetched
       setState(() {
         _weather = currentWeather;
         _currentLocation = _weather?.location ?? 'n/a';
-
-        // Save the current valid location and weather data
-        _lastValidLocation = _currentLocation;
-        _lastValidWeather = _weather;
-      });
-    } on CityNotFoundException catch (e) {
-      _showErrorDialog(context, e.message);
-
-      // Revert to the last valid location and weather data
-      setState(() {
-        _currentLocation = _lastValidLocation;
-        _weather = _lastValidWeather;
       });
     } catch (e) {
-      _showErrorDialog(context, 'Location not found. Please try again.');
-
-      // Revert to the last valid location and weather data
-      setState(() {
-        _currentLocation = _lastValidLocation;
-        _weather = _lastValidWeather;
-      });
+      // Handle the case where the location does not exist
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Location does not exist. Please try again."),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
+
 
   Future<void> _dailyForecast() async {
     if (location == null) return;
@@ -139,28 +132,15 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     _cityInput = initial ?? _searchLocation.text.trim();
     _currentLocation = _cityInput;
     _searchLocation.clear();
-    await initialize();
+
+    try {
+      await initialize();
+      await _getWeather(); // Ensure this is called to handle invalid city names
+    } catch (e) {
+      // Already handled in `_getWeather`
+    }
   }
 
-  void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   String _getBackgroundImage(String? condition) {
     switch (condition?.toLowerCase()) {
@@ -185,102 +165,85 @@ class _WeatherHomePageState extends ConsumerState<WeatherHomePage> {
     app.loadSavedFavoriteLocation(favouriteLocation ?? temp);
 
     return Scaffold(
+      drawer: Drawer(width: 320, child: FavoriteLocationsPage()),
       appBar: AppBar(
-        title: const Text("Weather Styles"),
+        title: const Text(
+          "Weather Styles",
+          style: TextStyle(fontSize: 17),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue,
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FavoriteLocationsPage(),
-                ),
-              );
-            },
-            child:
-            const Text("Favorites", style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
       body: location == null
-          ? ListView(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-        children: const [
-          Text(
-            "Loading...",
-            style: TextStyle(
-              fontSize: 12,
-            ),
-          ),
-        ],
-      )
+          ? const Center(
+              child: Text(
+                "Loading...",
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            )
           : Stack(
-        children: [
-          // Background image with overlay
-          Stack(
-            children: [
-              Image.asset(
-                _getBackgroundImage(currentCondition),
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-              Container(
-                color: Colors.black.withOpacity(0.4),
-              ),
-            ],
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Background image with overlay
+                Stack(
                   children: [
-                    TopSection(
-                      favoriteLocations: app.favourites,
-                      currentLocation: _currentLocation,
-                      searchLocation: _searchLocation,
-                      onSearchPressed: () async =>
-                      await searchIconPressed(),
-                      onSearchSubmit: (value) {
-                        setState(() => _cityInput = _searchLocation.text);
-                        _getWeather();
-                        _dailyForecast();
-                        _airQuality();
-                        _searchLocation.clear();
-                      },
-                      onFavouriteChanged: (value) {
-                        if (value) {
-                          app.removeFavourite(_currentLocation);
-                        } else {
-                          app.addFavourite = _currentLocation;
-                        }
-                      },
+                    Image.asset(
+                      _getBackgroundImage(currentCondition),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
-                    const SizedBox(height: 20),
-                    WeatherInfo(
-                        weather: _weather,
-                        airQuality: _airQualityIndex),
-                    const SizedBox(height: 20),
-                    OutfitSuggestion(
-                      temperature: _weather?.temperature ?? 20.5,
-                      weatherCondition:
-                      _weather?.weatherCondition ?? "clear",
+                    Container(
+                      color: Colors.black.withOpacity(0.4),
                     ),
-                    const SizedBox(height: 20),
-                    UpcomingDays(forecast: _forecast),
-                    const SizedBox(height: 20),
-                    BottomSection(weather: _weather),
                   ],
                 ),
-              ),
+                SafeArea(
+                    child: SingleChildScrollView(
+                        child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TopSection(
+                        favoriteLocations: favouriteLocation ?? [],
+                        currentLocation: _currentLocation,
+                        searchLocation: _searchLocation,
+                        onSearchPressed: () async => await searchIconPressed(),
+                        onSearchSubmit: (value) {
+                          setState(() => _cityInput = _searchLocation.text);
+                          _getWeather();
+                          _dailyForecast();
+                          _airQuality();
+                          _searchLocation.clear();
+                        },
+                        onFavouriteChanged: (value) {
+                          if (value) {
+                            app.removeFavourite(_currentLocation);
+                          } else {
+                            app.addFavourite = _currentLocation;
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      WeatherInfo(
+                          weather: _weather, airQuality: _airQualityIndex),
+                      const SizedBox(height: 20),
+                      OutfitSuggestion(
+                        temperature: _weather?.temperature ?? 20.5,
+                        weatherCondition: _weather?.weatherCondition ?? "clear",
+                      ),
+                      const SizedBox(height: 20),
+                      UpcomingDays(forecast: _forecast),
+                      const SizedBox(height: 20),
+                      BottomSection(weather: _weather),
+                    ],
+                  ),
+                ))),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
