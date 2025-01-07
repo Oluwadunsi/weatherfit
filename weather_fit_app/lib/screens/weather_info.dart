@@ -14,7 +14,7 @@ class WeatherInfo extends StatelessWidget {
     final String locationAirQuality = '${airQuality?.airQualityIndex.toString()}'; // Replace with live data later
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1), // Reduced vertical padding
+      padding: const EdgeInsets.symmetric(vertical: 8), // Reduced vertical padding
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,16 +30,13 @@ class WeatherInfo extends StatelessWidget {
           ),
           // Location, Weather Condition, and Temperature Section
           Column(
-           // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const SizedBox(width: 55),
               Container(
                 constraints: const BoxConstraints(
                   maxWidth: 200,
                 ),
                 child: Text(
                       weather?.location ?? "",
-
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -49,7 +46,7 @@ class WeatherInfo extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 4), // Reduced spacing
+              const SizedBox(height: 5), // Reduced spacing
               Text(
                 weather?.weatherCondition ?? "",
                 style: const TextStyle(
@@ -77,7 +74,8 @@ class WeatherInfo extends StatelessWidget {
   // Helper method for compact UV and Air Quality cards
   Widget _buildCompactInfoCard(String title, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6), // Reduced padding
+      width: 150,
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 7), // Reduced padding
       decoration: BoxDecoration(
         color: Colors.blue[50],
         borderRadius: BorderRadius.circular(12),
@@ -87,12 +85,12 @@ class WeatherInfo extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 2), // Reduced spacing
           Text(
             value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
           ),
         ],
       ),
